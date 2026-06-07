@@ -149,28 +149,28 @@ This section describes the required test topology, equipment, DUT configuration,
 The test topology consists of four primary components: the DUT, an RPKI-RTR update source, a BGP traffic generator, and a tester for generating data-plane traffic load. The DUT is a router equipped with ROV capabilities, supporting the RPKI-RTR protocol and applying ROV policies to received BGP routes. The RPKI-RTR update source may be either a real RPKI cache implementation running in isolated mode or a dedicated emulator capable of producing arbitrary VRP sets and update patterns. This RTR source connects directly to the DUT using the RTR protocol and provides controlled VRP updates, including serial increments, cache resets, and bursty or delayed update sequences. 
 
 The BGP traffic generator establishes one or more BGP peering sessions with the DUT and is responsible for delivering a full routing table together with controlled withdrawal or re-announcement events. Because IPv4 and IPv6 tables differ in scale and may exercise different implementation paths, the test setup must state the number of IPv4 routes and the number of IPv6 routes separately. A test MAY use a mixed baseline table (for example, 1,000,000 IPv4 routes and 250,000 IPv6 routes) or MAY benchmark each address family identifier (AFI) separately. In either case, the chosen route counts and AFIs under test must remain fixed across repeated runs for the same condition. The generator should be capable of presenting both stable baseline routing conditions and timed ROV-affected prefixes whose validation status will change in response to VRP updates.
-A tester is connected to the DUT to introduce controlled data-plane load during benchmarking. When present, the tester should generate stable and deterministic traffic loads so that the impact of forwarding load on ROV processing can be evaluated. When data-plane load is applied, its rate, frame size, traffic pattern, and address-selection rules must be documented in the test report.
+A tester is connected to the DUT to introduce controlled data-plane load during benchmarking. When present, the tester should generate stable and deterministic traffic loads so that the impact of forwarding load on ROV processing can be evaluated. When data-plane load is applied, its rate, frame size, traffic pattern, and address-selection rules needs be documented in the test report.
 
 ## DUT Configuration Requirements
 
-The DUT must be configured with ROV enabled on all BGP sessions receiving test routes. The router must establish a stable and fully functional RPKI-RTR session with the RTR emulator. To ensure that performance results are attributable solely to ROV behavior, all non-essential features on the DUT, such as additional routing protocols, unnecessary telemetry mechanisms, and unused services, should be disabled. Logging related to ROV may remain enabled for debugging purposes but must be rate-limited to avoid skewing CPU measurements or affecting test repeatability. All system parameters relevant to routing performance, such as multipath behavior or maximum-prefix limits, must be documented prior to testing.
+The DUT must be configured with ROV enabled on all BGP sessions receiving test routes. The router needs to establish a stable and fully functional RPKI-RTR session with the RTR emulator. To ensure that performance results are attributable solely to ROV behavior, all non-essential features on the DUT, such as additional routing protocols, unnecessary telemetry mechanisms, and unused services, should be disabled. Logging related to ROV may remain enabled for debugging purposes but can be rate-limited to avoid skewing CPU measurements or affecting test repeatability. All system parameters relevant to routing performance, such as multipath behavior or maximum-prefix limits, is suggested to be documented prior to testing.
 
 ## RTR Data Source Emulation
 
-The RTR emulator must be capable of generating synthetic VRP data sets with user-defined characteristics. This includes the ability to create arbitrary combinations of prefixes and ASNs, overlapping VRPs, conflicting VRPs, and other edge cases relevant to validation logic. The VRP datasets should mimic realistic global distributions where appropriate, but must also support scaling tests where VRP volumes are substantially higher than today's norm. The data source must further support generating controlled bursts of VRP updates, ranging from 100 to 10,000 VRP changes per second, and must allow for both additive updates and withdrawals.
+The RTR emulator is used to generate synthetic VRP data sets with user-defined characteristics. This includes the ability to create arbitrary combinations of prefixes and ASNs, overlapping VRPs, conflicting VRPs, and other edge cases relevant to validation logic. The VRP datasets should mimic realistic global distributions where appropriate, but can also support scaling tests where VRP volumes are substantially higher than today's norm. The data source needs to be able to further support generating controlled bursts of VRP updates, ranging from 100 to 10,000 VRP changes per second, and can allow for both additive updates and withdrawals.
 
 ## BGP Traffic Generation Requirements
 
-The BGP traffic generator must present the DUT with a stable baseline routing table prior to initiating any benchmark. This ensures that the DUT begins each test run in a known, converged state with predictable CPU and memory utilization. The generator must also provide a set of ROV-affected prefixes whose origin AS can be manipulated in concert with VRP updates from the RTR emulator. These prefixes should span a range of prefix lengths and originate from diverse ASes to reflect realistic routing conditions. The traffic generator must support deterministic convergence triggers, such as the precise injection of BGP updates following a VRP change or the simultaneous application of both BGP and VRP events.
+The BGP traffic generator should be able to present the DUT with a stable baseline routing table prior to initiating any benchmark. This ensures that the DUT begins each test run in a known, converged state with predictable CPU and memory utilization. The generator can also provide a set of ROV-affected prefixes whose origin AS can be manipulated in concert with VRP updates from the RTR emulator. These prefixes should span a range of prefix lengths and originate from diverse ASes to reflect realistic routing conditions. The traffic generator can support deterministic convergence triggers, such as the precise injection of BGP updates following a VRP change or the simultaneous application of both BGP and VRP events.
 
 ## Traffic Profile Parameters
 
 When data-plane traffic is used, the following parameters should be specified:
 
-- Fixed frame size used for the measurement. For convergence measurements, a small fixed packet size SHOULD be used to improve time resolution. A 128-byte packet at Layer 3 is one practical choice. Other fixed sizes MAY be used when required by the traffic generator or encapsulation overhead, but the selected size must be documented.  
+- Fixed frame size used for the measurement. For convergence measurements, a small fixed packet size SHOULD be used to improve time resolution. A 128-byte packet at Layer 3 is one practical choice. Other fixed sizes MAY be used when required by the traffic generator or encapsulation overhead, but the selected size needs to be documented.  
 - Traffic rate in packets per second (PPS). For convergence measurements, the traffic should use a constant rate so that packet arrival times map directly to time resolution. Burst traffic MAY be used in stress scenarios, but such tests must be reported separately from constant-rate convergence tests.  
 - Traffic pattern. For convergence measurements, constant-rate traffic is RECOMMENDED. 
-- Source and destination IP address selection rules. When the setup sends one stream per tested prefix, the destination address for that stream should be selected from within the tested prefix. The first usable address is one valid example. The selection rule must be documented and applied consistently across runs.  
+- Source and destination IP address selection rules. When the setup sends one stream per tested prefix, the destination address for that stream should be selected from within the tested prefix. The first usable address is one valid example. The selection rule needs to be documented and applied consistently across runs.  
 - Whether traffic matches ROV-affected prefixes.  
 
 Each frame size and PPS combination should be reported separately.
@@ -193,11 +193,11 @@ Accurate benchmarking depends on precise control of the input conditions applied
 
 * A stable and realistic baseline BGP RIB-in with IPv4 and IPv6 route counts documented separately (for example, 1,000,000 IPv4 routes and 250,000 IPv6 routes in a mixed table, or equivalent AFI-specific baselines).
 
-* A defined coverage level of the VRP dataset relative to the announced routing space. Coverage SHOULD be reported as the percentage of announced prefixes, or the percentage of announced address space, for which at least one matching VRP exists. The selected coverage definition must be stated and applied consistently across runs.
+* A defined coverage level of the VRP dataset relative to the announced routing space. Coverage SHOULD be reported as the percentage of announced prefixes, or the percentage of announced address space, for which at least one matching VRP exists. The selected coverage definition neds to be stated and applied consistently across runs.
 
 * Defined structural properties of the VRP dataset, including overlap characteristics. At minimum, the test should specify the fraction or probability that a VRP is covered by another VRP, for example where a more-specific VRP falls within the prefix range of a less-specific VRP. Tests MAY additionally report the distribution of covering depth, prefix lengths, and authorized origin AS diversity when those properties are relevant to the implementation under test.
 
-From this baseline, input variables may be modified to stress different aspects of ROV behavior. These variables include the VRP churn rate, ranging from steady incremental updates to high-intensity bursts, the coverage level of the VRP dataset, the overlap probability among VRPs, and the type of RPKI-RTR updates provided to the DUT, such as incremental updates versus full-table refreshes. Each of these conditions may trigger different processing strategies within the DUT, and therefore must be explicitly controlled and documented.
+From this baseline, input variables may be modified to stress different aspects of ROV behavior. These variables include the VRP churn rate, ranging from steady incremental updates to high-intensity bursts, the coverage level of the VRP dataset, the overlap probability among VRPs, and the type of RPKI-RTR updates provided to the DUT, such as incremental updates versus full-table refreshes. Each of these conditions may trigger different processing strategies within the DUT, and therefore needs to be explicitly controlled and documented.
 
 ## Metrics and Measurements
 
@@ -283,7 +283,7 @@ The **test procedures** for ROV validation latency are listed below:
 
     - Control and report the distribution of affected prefixes across the validation structure. At minimum, include one scenario in which affected prefixes are localized to the same region of the validation structure (for example, sharing a common covering prefix, trie branch, or address block) and one scenario in which affected prefixes are distributed across different regions.  
 
-    - The locality rule, address-family mix, prefix-length distribution, and number of affected prefixes per region must be documented.  
+    - The locality rule, address-family mix, prefix-length distribution, and number of affected prefixes per region needs to be documented.  
 
 3. Trigger validation update  
 
@@ -349,7 +349,7 @@ The **test procedures** for VRP-triggered BGP convergence are listed below:
 
     - Post-installation BGP convergence timer: This timer should start when the DUT completes installation of the relevant VRP update and should end when both the BGP RIB and FIB reach stable state. This metric isolates BGP convergence after VRP installation.  
 
-    - If only one timer is reported, the report must state which timer definition is used.  
+    - If only one timer is reported, the report needs to state which timer definition is used.  
 
 6. Record:  
 
@@ -555,7 +555,7 @@ The **test procedures** for RTR session behavior tests are listed below:
 
 # Reporting Requirements 
 
-An ROV benchmarking report must provide enough details to allow reproducibility and meaningful comparison across different DUTs. Each report must include the following elements:
+An ROV benchmarking report must provide enough details to allow reproducibility and meaningful comparison across different DUTs. Each report needs to include the following elements:
 
 * **Test environment description**: The report must specify the DUT hardware and software versions, the testbed topology, and all ROV-related configuration parameters required to replicate the setup.  
 
@@ -567,7 +567,7 @@ An ROV benchmarking report must provide enough details to allow reproducibility 
 
 * **Summary of observations**: The report must include a concise summary of overall DUT performance, scalability limits observed, and any significant effects of enabling ROV on BGP behavior. 
 
-In addition, the report must include, at minimum, the following parameters:
+In addition, the report is suggested to include, at minimum, the following parameters:
 
 - DUT hardware model, CPU architecture, memory size, and software version.  
 - Complete DUT configuration relevant to ROV and BGP.  
