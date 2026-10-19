@@ -618,7 +618,7 @@ This document has no actions for IANA.
 
 Many thanks to Giuseppe Fioccola, Christian Giese, and Maria Matejka for their review, comments, and suggestions.
 
-# Appendix A. Summary of Changes (to be removed by RFC Editor before publication) {#changes}
+# Appendix A. Summary of Changes {#changes}
 {: numbered="false"}
 
 This appendix summarizes the major changes introduced in previous revisions of this document.
