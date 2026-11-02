@@ -6,7 +6,7 @@ submissiontype: IETF
 area: Operations and Management
 wg: BMWG
 
-docname: draft-lg-bmwg-benchmarking-methodology-for-rov-03
+docname: draft-lg-bmwg-benchmarking-methodology-for-rov-04
 
 title: Benchmarking Methodology for Route Origin Validation (ROV)
 abbrev: ROV Benchmarking
@@ -47,6 +47,54 @@ normative:
  
 informative:
   RFC7942:
+
+  BIRD:
+    title: "BIRD Internet Routing Daemon"
+    author:
+      org: "CZ.NIC"
+    target: https://bird.nic.cz/
+    date: false
+
+  BRIO:
+    title: "NIST BGP-RPKI-IO (BRIO)"
+    author:
+      org: "National Institute of Standards and Technology"
+    target: https://github.com/usnistgov/NIST-BRIO
+    date: false
+
+  BNGBLASTER:
+    title: "Routing Protocol and BNG Blaster"
+    author:
+      org: "RtBrick"
+    target: https://rtbrick.github.io/bngblaster/
+    date: false
+
+  RIPE-RIS:
+    title: "Routing Information Service (RIS)"
+    author:
+      org: "RIPE NCC"
+    target: https://www.ripe.net/analyse/internet-measurements/routing-information-service-ris/
+    date: false
+
+  RPKIViews:
+    title: "RPKIViews"
+    author:
+      ins: J. Snijders
+      name: Job Snijders
+    target: https://rpkiviews.org/
+    date: false
+
+  ROUTINATOR:
+    title: "Routinator"
+    author:
+      org: "NLnet Labs"
+    target: https://github.com/NLnetLabs/routinator
+    date: false
+
+  STAYRTR:
+    title: "StayRTR"
+    target: https://github.com/bgp/stayrtr
+    date: false
 
 ...
 
@@ -619,7 +667,7 @@ Tests involving stress conditions, such as high churn rates or large-scale VRP u
 
 This section summarizes the current implementation and experimental coverage of this methodology, following the reporting approach in {{RFC7942}}. It provides implementation experience for IETF discussion.
 
-A prototype implementation of the benchmarking methodology described in this document supports the experiments reported in {{implementation-detail}}. It uses BIRD as the routing and ROV implementation, the Linux kernel for forwarding, a locally modified BRIO as the RTR source, and Bngblaster for BGP traffic generation.
+A prototype implementation of the benchmarking methodology described in this document supports the experiments reported in {{implementation-detail}}. It uses BIRD {{BIRD}} as the routing and ROV implementation, the Linux kernel for forwarding, a locally modified BRIO {{BRIO}} as the RTR source, and Bngblaster {{BNGBLASTER}} for BGP traffic generation.
 
 Implemented:
 
@@ -651,11 +699,14 @@ Many thanks to Giuseppe Fioccola, Christian Giese, and Maria Matejka for their r
 
 This appendix summarizes the major changes introduced in previous revisions of this document.
 
-## Appendix A.3. Changes from -02 to -03
+## Appendix A.1. Changes from -00 to -01
 {: numbered="false"}
+The major changes from version -00 to version -01 are as follows:
 
-Version -03 adds this appendix to summarize the major changes introduced across document revisions and improve revision traceability. 
-No technical changes to the benchmarking methodology or benchmark procedures are introduced in this revision.
+* Refined the test topology and baseline BGP input conditions to distinguish IPv4 and IPv6 route counts and to support mixed or AFI-specific benchmarking under fixed and repeatable conditions.  
+* Refined the data-plane traffic profile for convergence measurements by specifying a fixed frame size, PPS-based constant-rate traffic, separate treatment of burst traffic, and deterministic source and destination address selection rules.  
+* Clarified resource utilization metrics and measurement procedures by distinguishing system-level CPU and memory consumption from per-process utilization of the ROV process and the BGP or routing process, when such counters are available.  
+* Updated the scalability, churn, resource utilization, and reporting procedures to consistently document AFIs under test, data-plane traffic parameters, and system-level and process-level resource measurements.
 
 ## Appendix A.2. Changes from -01 to -02
 {: numbered="false"}
@@ -669,14 +720,19 @@ The major changes from version -01 to version -02 are as follows:
 * Extended RTR session recovery, cache failover, and full resynchronization tests to include the subsequent BGP recalculation and convergence caused by restored or changed ROV state.  
 * Expanded the reporting requirements to cover the newly introduced VRP dataset characteristics, update types, validation-change causes, locality conditions, and convergence timer definitions, and refined the use of normative requirement language throughout the methodology.  
 
-## Appendix A.3. Changes from -00 to -01
+## Appendix A.3. Changes from -02 to -03
 {: numbered="false"}
-The major changes from version -00 to version -01 are as follows:
 
-* Refined the test topology and baseline BGP input conditions to distinguish IPv4 and IPv6 route counts and to support mixed or AFI-specific benchmarking under fixed and repeatable conditions.  
-* Refined the data-plane traffic profile for convergence measurements by specifying a fixed frame size, PPS-based constant-rate traffic, separate treatment of burst traffic, and deterministic source and destination address selection rules.  
-* Clarified resource utilization metrics and measurement procedures by distinguishing system-level CPU and memory consumption from per-process utilization of the ROV process and the BGP or routing process, when such counters are available.  
-* Updated the scalability, churn, resource utilization, and reporting procedures to consistently document AFIs under test, data-plane traffic parameters, and system-level and process-level resource measurements.
+Version -03 adds this appendix to summarize the major changes introduced across document revisions and improve revision traceability. 
+No technical changes to the benchmarking methodology or benchmark procedures are introduced in this revision.
+
+## Appendix A.4. Changes from -03 to -04
+{: numbered="false"}
+
+The major changes from version -03 to version -04 are as follows:
+
+* Added Appendix B documenting a BIRD-based implementation of the benchmarking methodology and its experimental results.
+* Added an Implementation Status section describing the prototype and its experimental coverage.
 
 # Appendix B. Implementation Details {#implementation-detail}
 {: numbered="false"}
@@ -686,9 +742,9 @@ This appendix describes the application of the benchmark tests in {{benchmark-te
 ## Appendix B.1. Test Environment {#report-environment}
 {: numbered="false"}
 
-The Device Under Test (DUT) consists of BIRD for routing and ROV processing, together with the Linux kernel for packet forwarding. BRIO supplies Validated ROA Payloads (VRPs) over the RPKI-to-Router (RTR) protocol, with local modifications providing first-Prefix-PDU send timestamps and controlled client disconnection. Bngblaster establishes BGP sessions and advertises the baseline and update routes, with a local modification for IPv6 neighbor emulation. A separate ingress sends UDP probes through the DUT; receivers at the emulated BGP peers identify the forwarding next hop.
+The Device Under Test (DUT) consists of BIRD for routing and ROV processing, together with the Linux kernel for packet forwarding. BRIO supplies Validated ROA Payloads (VRPs) over the RPKI-to-Router (RTR) protocol, with local modifications providing first-Prefix-PDU send timestamps and controlled client disconnection. Bngblaster establishes BGP sessions and advertises the baseline and update routes, with a local modification for IPv6 neighbor emulation. A separate ingress sends UDP probes through the DUT; receivers at the emulated BGP peers identify the forwarding next hop. The test environment configuration is summarized in {{fig-test-environment}}.
 
-The test setup uses BRIO for direct control over incremental VRP additions and withdrawals in the VRP churn and stress test ({{vrp-churn-and-stress-tests}}). By comparison, widely used RTR tools, such as Routinator and StayRTR, derive incremental updates by comparing complete VRP sets internally. The additional processing delays transmission, making this approach unsuitable for continuous monitoring in this test.
+The test setup uses BRIO for direct control over incremental VRP additions and withdrawals in the VRP churn and stress test ({{vrp-churn-and-stress-tests}}). By comparison, widely used RTR tools, such as Routinator {{ROUTINATOR}} and StayRTR {{STAYRTR}}, derive incremental updates by comparing complete VRP sets internally. The additional processing delays transmission, making this approach unsuitable for continuous monitoring in this test.
 
 ~~~
 +==========================+=================================================+
@@ -704,22 +760,25 @@ The test setup uses BRIO for direct control over incremental VRP additions and w
 | Routing software         | BIRD 2.19.2                                     |
 +--------------------------+-------------------------------------------------+
 | BGP traffic generator    | Bngblaster 0.9.39, with local modifications     |
+|                          |                                                 |
 +--------------------------+-------------------------------------------------+
 | RTR source               | BRIO b7.1.2, with local modifications           |
 +--------------------------+-------------------------------------------------+
+
 ~~~
+{: #fig-test-environment title="Test environment configuration."}
 
 ## Appendix B.2. BGP and VRP Data {#report-data}
 {: numbered="false"}
 
-**Initial BGP data.** Routes are sampled from the RIPE RIS RRC00 MRT snapshot of 9 September 2026 at 00:00 UTC. Sampling is performed separately for IPv4 and IPv6, with quotas allocated across peers, targeting 1,000,000 IPv4 and 250,000 IPv6 routes. Conversion preserves the original BGP path attributes. Two filters are applied:
+**Initial BGP data.** Routes are sampled from the RIPE RIS {{RIPE-RIS}} RRC00 MRT snapshot of 9 September 2026 at 00:00 UTC. Sampling is performed separately for IPv4 and IPv6, with quotas allocated across peers, targeting 1,000,000 IPv4 and 250,000 IPv6 routes. Conversion preserves the original BGP path attributes. Two filters are applied:
 
 - Routes whose NEXT_HOP differs from the advertising peer's address are excluded to avoid exceeding the interface capacity of the test setup when emulating additional next hops. The Bngblaster build supports at most 255 TCP-enabled interfaces.
 - Routes with AS_PATH text too long to be displayed in full are excluded to prevent truncation in BIRD's CLI output and RIB change logs.
 
 The resulting baseline contains 999,125 IPv4 and 222,006 IPv6 candidate routes from 99 peers, covering 805,052 distinct prefixes. Different peers' advertisements of the same prefix are retained as separate candidates. All experiments use this BGP baseline.
 
-**Initial VRP data.** VRPs originate from the RPKIViews snapshot of 8 September 2026 at 23:47:23 UTC. AS0 records are removed, and additional authorizations are generated to bring the numbers of Invalid and NotFound BGP routes closer together. The resulting baseline contains 1,060,368 VRPs: 820,699 IPv4 and 239,669 IPv6. Experiments use either this complete baseline or sampled subsets.
+**Initial VRP data.** VRPs originate from the RPKIViews {{RPKIViews}} snapshot of 8 September 2026 at 23:47:23 UTC. AS0 records are removed, and additional authorizations are generated to bring the numbers of Invalid and NotFound BGP routes closer together. The resulting baseline contains 1,060,368 VRPs: 820,699 IPv4 and 239,669 IPv6. Experiments use either this complete baseline or sampled subsets.
 
 The inputs comprise four datasets:
 
@@ -743,7 +802,7 @@ The BGP update dataset includes mixed workloads and workloads containing a singl
 ## Appendix B.3. Measurement Methods {#report-measurement}
 {: numbered="false"}
 
-The measurements distinguish authorization installation, validation queries, routing decisions, and forwarding behavior.
+The collection methods and observation timestamps for authorization installation, validation queries, routing decisions, and forwarding behavior are summarized in {{fig-measurement-methods}}.
 
 ~~~
 +========================+=========================+=========================+
@@ -765,7 +824,9 @@ The measurements distinguish authorization installation, validation queries, rou
 |                        | received at candidate   | observation deadline    |
 |                        | next hops               | where applicable        |
 +------------------------+-------------------------+-------------------------+
+
 ~~~
+{: #fig-measurement-methods title="Measurement methods and observation timestamps."}
 
 The collector queries ROV states through BIRD's command-line interface over a persistent UNIX domain socket connection. It sends query commands in groups and receives all replies before submitting the next group. In the ordinary convergence experiments, a new observation is compared with the previous state, and only a state change creates an event.
 
@@ -778,38 +839,40 @@ Some experiments measure short intervals that are particularly sensitive to paus
 
 ROV queries use a default group size of eight commands. Convergence experiments use a ten-second quiet period and, where forwarding is monitored, an aggregate probe limit of 10,000 packets/s with a one-second packet deadline. Collection stops after the quiet period, with pending logs and events drained. In ordinary convergence experiments, expected-state matching and final correctness checks are performed after timed collection. The reported last-change endpoint excludes the subsequent quiet period. The VRP churn and stress test ({{vrp-churn-and-stress-tests}}) retains pending targets across subsequent batches and checks their completion periodically during collection. The RTR session behavior tests ({{rtr-session-behavior-tests}}) additionally require scenario-specific protocol events.
 
-The default origin for transmission-based intervals is BRIO's monotonic timestamp immediately before the first successful Prefix PDU send call for the relevant response. Continuous-update VRP latency measurements in {{report-vrp-churn}} instead start at the corresponding Serial Notify send time: multiple batches may share one RTR response, preventing its first Prefix PDU from providing a separate origin for each batch. ROV, RIB, and FIB latencies in that experiment use a post-installation origin. Post-installation intervals and scenario-specific origins are defined in the corresponding experiments.
+The default origin for transmission-based intervals is BRIO's monotonic timestamp immediately before the first successful Prefix PDU send call for the relevant response. Continuous-update VRP latency measurements in {{fig-churn-vrp-latency}} instead start at the corresponding Serial Notify send time: multiple batches may share one RTR response, preventing its first Prefix PDU from providing a separate origin for each batch. ROV, RIB, and FIB latencies in that experiment use a post-installation origin. Post-installation intervals and scenario-specific origins are defined in the corresponding experiments.
 
 Latency values are expressed in milliseconds unless another unit is specified. Standard deviation is the sample standard deviation. P95 is the 95th percentile using linear interpolation between ordered samples. The sample count denotes repeated runs, different inputs, or observed batches as specified in each section. An em dash denotes an unavailable measurement; N/A denotes an inapplicable measurement.
 
 ## Appendix B.5. ROV Update Processing Latency {#report-vrp-update}
 {: numbered="false"}
 
-This experiment implements the update-processing test in {{test-rov-update}} using nested initial sets of 50k, 100k, 500k, and 1M VRPs, with 1,000 VRP operations at each scale. It measures installation latency for incremental and full-table updates. Each condition is repeated ten times. The results are as follows.
+This experiment implements the update-processing test in {{test-rov-update}} using nested initial sets of 50k, 100k, 500k, and 1M VRPs, with 1,000 VRP operations at each scale. It measures installation latency for incremental and full-table updates. Each condition is repeated ten times. The results are shown in {{fig-vrp-update-latency}}.
 
 ~~~
-+============+=================+=================+=================+=================+=================+
-|  Initial   |    Mean (ms)    |  Std. dev. (ms) |   Minimum (ms)  |   Maximum (ms)  |     P95 (ms)    |
-|    VRPs    |                 |                 |                 |                 |                 |
-+------------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+
-|            | Incr.  |  Full  | Incr.  |  Full  | Incr.  |  Full  | Incr.  |  Full  | Incr.  |  Full  |
-+============+========+========+========+========+========+========+========+========+========+========+
-|        50k | 47.489 |160.076 |  2.434 |  3.513 | 45.186 |154.845 | 51.302 |164.765 | 51.170 |164.759 |
-+------------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+
-|       100k | 46.460 |319.486 |  3.047 |  7.385 | 43.172 |305.609 | 51.389 |331.359 | 51.323 |329.472 |
-+------------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+
-|       500k | 42.628 |1631.664|  2.713 | 16.436 | 38.670 |1598.010| 47.795 |1659.967| 47.325 |1653.157|
-+------------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+
-|         1M | 38.704 |3366.851|  3.245 | 54.778 | 32.703 |3299.205| 44.141 |3447.183| 43.178 |3444.970|
-+------------+--------+--------+--------+--------+--------+--------+--------+--------+--------+--------+
-~~~
++============+===================+=================+===================+===================+===================+
+|  Initial   |     Mean (ms)     |  Std. dev. (ms) |    Minimum (ms)   |    Maximum (ms)   |      P95 (ms)     |
+|    VRPs    |                   |                 |                   |                   |                   |
++------------+--------+----------+--------+--------+--------+----------+--------+----------+--------+----------+
+|            | Incr.  |   Full   | Incr.  |  Full  | Incr.  |   Full   | Incr.  |   Full   | Incr.  |   Full   |
++============+========+==========+========+========+========+==========+========+==========+========+==========+
+|        50k | 47.489 |  160.076 |  2.434 |  3.513 | 45.186 |  154.845 | 51.302 |  164.765 | 51.170 |  164.759 |
++------------+--------+----------+--------+--------+--------+----------+--------+----------+--------+----------+
+|       100k | 46.460 |  319.486 |  3.047 |  7.385 | 43.172 |  305.609 | 51.389 |  331.359 | 51.323 |  329.472 |
++------------+--------+----------+--------+--------+--------+----------+--------+----------+--------+----------+
+|       500k | 42.628 | 1631.664 |  2.713 | 16.436 | 38.670 | 1598.010 | 47.795 | 1659.967 | 47.325 | 1653.157 |
++------------+--------+----------+--------+--------+--------+----------+--------+----------+--------+----------+
+|         1M | 38.704 | 3366.851 |  3.245 | 54.778 | 32.703 | 3299.205 | 44.141 | 3447.183 | 43.178 | 3444.970 |
++------------+--------+----------+--------+--------+--------+----------+--------+----------+--------+----------+
 
-Incr. denotes incremental delivery; Full denotes full-table resynchronization. Incremental update latency is short and similar across the tested table sizes, averaging approximately 40–50 ms. Full-table resynchronization latency increases as the VRP table grows.
+~~~
+{: #fig-vrp-update-latency title="VRP installation latency for incremental and full-table updates."}
+
+Incr. denotes incremental delivery; Full denotes full-table resynchronization. In {{fig-vrp-update-latency}}, incremental update latency is short and similar across the tested table sizes, averaging approximately 40–50 ms. Full-table resynchronization latency increases as the VRP table grows.
 
 ## Appendix B.6. ROV Validation Latency {#report-rov-validation}
 {: numbered="false"}
 
-This experiment implements the validation-latency test in {{test-rov-validation}} using 1,060,368 initial VRPs and updates targeting 100, 500, or 1,000 selected prefixes in localized and distributed groups. With BIRD's ROA-table trie enabled, it measures validation latency from VRP installation completion. The results are as follows.
+This experiment implements the validation-latency test in {{test-rov-validation}} using 1,060,368 initial VRPs and updates targeting 100, 500, or 1,000 selected prefixes in localized and distributed groups. With BIRD's ROA-table trie enabled, it measures validation latency from VRP installation completion. The results are shown in {{fig-rov-validation-latency}}.
 
 ~~~
 +============+=====================+=====================+=====================+=====================+=====================+
@@ -824,9 +887,11 @@ This experiment implements the validation-latency test in {{test-rov-validation}
 +------------+----------+----------+----------+----------+----------+----------+----------+----------+----------+----------+
 |      1,000 |  174.169 | 2119.743 |   33.637 |  961.166 |  144.346 |  906.791 |  256.348 | 3934.232 |  231.466 | 3501.198 |
 +------------+----------+----------+----------+----------+----------+----------+----------+----------+----------+----------+
-~~~
 
-Local. denotes localized inputs; Distrib. denotes distributed inputs. ROV validation latency increases with the number of selected prefixes in both scenarios. For the same selected prefix count, localized workloads show lower observed latency. However, selecting the same number of prefixes does not mean that the same number of prefixes is actually affected. For example, both workloads select 1,000 prefixes, but ROV states change for 3,640 prefixes in the localized scenario and 23,777 prefixes in the distributed scenario. The longer latency in the distributed scenario is therefore associated with both a different prefix distribution and more prefixes to process.
+~~~
+{: #fig-rov-validation-latency title="ROV validation latency for localized and distributed workloads."}
+
+Local. denotes localized inputs; Distrib. denotes distributed inputs. As shown in {{fig-rov-validation-latency}}, ROV validation latency increases with the number of selected prefixes in both scenarios. For the same selected prefix count, localized workloads show lower observed latency. However, selecting the same number of prefixes does not mean that the same number of prefixes is actually affected. For example, both workloads select 1,000 prefixes, but ROV states change for 3,640 prefixes in the localized scenario and 23,777 prefixes in the distributed scenario. The longer latency in the distributed scenario is therefore associated with both a different prefix distribution and more prefixes to process.
 
 ## Appendix B.7. BGP Convergence with ROV Enabled {#report-bgp-convergence}
 {: numbered="false"}
@@ -836,7 +901,7 @@ The following experiments correspond to the two cases in {{bgp-convergence-with-
 ### Appendix B.7.1. Case A: VRP-triggered BGP convergence {#report-vrp-bgp-convergence}
 {: numbered="false"}
 
-This experiment implements the test in {{case-a-vrp-triggered-bgp-convergence}} using 1,060,368 initial VRPs and the distributed workload with 1,000 selected prefixes, requiring 1,230 VRP operations. It monitors RIB and FIB changes and reports end-to-end and post-installation convergence times below.
+This experiment implements the test in {{case-a-vrp-triggered-bgp-convergence}} using 1,060,368 initial VRPs and the distributed workload with 1,000 selected prefixes, requiring 1,230 VRP operations. It monitors RIB and FIB changes. End-to-end and post-installation convergence times are shown in {{fig-vrp-bgp-convergence}}.
 
 ~~~
 +===================+==========+=========+==========+==========+==========+
@@ -850,62 +915,72 @@ This experiment implements the test in {{case-a-vrp-triggered-bgp-convergence}} 
 | Post-installation | 4813.556 | 363.372 | 4540.745 | 5703.936 | 5432.527 |
 | BGP convergence   |          |         |          |          |          |
 +-------------------+----------+---------+----------+----------+----------+
-~~~
 
-The final FIB change determines the convergence endpoint in all ten runs. Mean end-to-end convergence is 5.03 s, of which 4.81 s occurs after VRP installation. Thus, most of the measured convergence interval follows installation, with FIB convergence taking longer than RIB convergence.
+~~~
+{: #fig-vrp-bgp-convergence title="VRP-triggered BGP convergence."}
+
+The final FIB change determines the convergence endpoint in all ten runs. Mean end-to-end convergence in {{fig-vrp-bgp-convergence}} is 5.03 s, of which 4.81 s occurs after VRP installation. Thus, most of the measured convergence interval follows installation, with FIB convergence taking longer than RIB convergence.
 
 ### Appendix B.7.2. Case B: BGP-triggered convergence with and without ROV {#report-bgp-update-convergence}
 {: numbered="false"}
 
-This experiment implements the test in {{case-b-bgp-triggered-convergence-with-and-without-rov}} with a fixed set of 1,060,368 VRPs and 1,000 BGP operations per workload. One mixed workload and five individual operation-type workloads are replayed with ROV enabled and disabled. RIB and FIB convergence is measured from the first BGP UPDATE send to the last observed change. The results are as follows.
+This experiment implements the test in {{case-b-bgp-triggered-convergence-with-and-without-rov}} with a fixed set of 1,060,368 VRPs and 1,000 BGP operations per workload. One mixed workload and five individual operation-type workloads are replayed with ROV enabled and disabled. RIB and FIB convergence is measured from the first BGP UPDATE send to the last observed change. The results are shown in {{fig-bgp-mixed}} through {{fig-bgp-best-to-invalid}}.
 
 **Mixed.**
 
 ~~~
-+============+===========+==============+==============+==========+
-| ROV policy | Mean (ms) | Minimum (ms) | Maximum (ms) | P95 (ms) |
-+============+===========+==============+==============+==========+
-| Enabled    | 10591.995 |    10532.102 |    10664.151 | 10662.097|
-+------------+-----------+--------------+--------------+----------+
-| Disabled   | 10580.443 |    10539.504 |    10648.550 | 10632.916|
-+------------+-----------+--------------+--------------+----------+
++============+===========+==============+==============+===========+
+| ROV policy | Mean (ms) | Minimum (ms) | Maximum (ms) |  P95 (ms) |
++============+===========+==============+==============+===========+
+| Enabled    | 10591.995 |    10532.102 |    10664.151 | 10662.097 |
++------------+-----------+--------------+--------------+-----------+
+| Disabled   | 10580.443 |    10539.504 |    10648.550 | 10632.916 |
++------------+-----------+--------------+--------------+-----------+
+
 ~~~
+{: #fig-bgp-mixed title="BGP convergence with ROV enabled and disabled: mixed updates."}
 
 **Withdraw best.**
 
 ~~~
-+============+===========+==============+==============+==========+
-| ROV policy | Mean (ms) | Minimum (ms) | Maximum (ms) | P95 (ms) |
-+============+===========+==============+==============+==========+
-| Enabled    |  9791.912 |     9168.918 |    11690.974 | 11275.438|
-+------------+-----------+--------------+--------------+----------+
-| Disabled   |  9599.031 |     9066.639 |    10978.189 | 10714.374|
-+------------+-----------+--------------+--------------+----------+
++============+===========+==============+==============+===========+
+| ROV policy | Mean (ms) | Minimum (ms) | Maximum (ms) |  P95 (ms) |
++============+===========+==============+==============+===========+
+| Enabled    |  9791.912 |     9168.918 |    11690.974 | 11275.438 |
++------------+-----------+--------------+--------------+-----------+
+| Disabled   |  9599.031 |     9066.639 |    10978.189 | 10714.374 |
++------------+-----------+--------------+--------------+-----------+
+
 ~~~
+{: #fig-bgp-withdraw-best title="BGP convergence with ROV enabled and disabled: Withdraw best."}
 
 **Add Valid.**
 
 ~~~
-+============+===========+==============+==============+==========+
-| ROV policy | Mean (ms) | Minimum (ms) | Maximum (ms) | P95 (ms) |
-+============+===========+==============+==============+==========+
-| Enabled    | 10158.053 |     9685.791 |    10586.965 | 10506.822|
-+------------+-----------+--------------+--------------+----------+
-| Disabled   | 10361.078 |    10173.760 |    11069.728 | 10893.730|
-+------------+-----------+--------------+--------------+----------+
++============+===========+==============+==============+===========+
+| ROV policy | Mean (ms) | Minimum (ms) | Maximum (ms) |  P95 (ms) |
++============+===========+==============+==============+===========+
+| Enabled    | 10158.053 |     9685.791 |    10586.965 | 10506.822 |
++------------+-----------+--------------+--------------+-----------+
+| Disabled   | 10361.078 |    10173.760 |    11069.728 | 10893.730 |
++------------+-----------+--------------+--------------+-----------+
+
 ~~~
+{: #fig-bgp-add-valid title="BGP convergence with ROV enabled and disabled: Add Valid."}
 
 **Add Invalid.**
 
 ~~~
-+============+===========+==============+==============+==========+
-| ROV policy | Mean (ms) | Minimum (ms) | Maximum (ms) | P95 (ms) |
-+============+===========+==============+==============+==========+
-| Enabled    |       N/A |          N/A |          N/A |      N/A |
-+------------+-----------+--------------+--------------+----------+
-| Disabled   |  9962.983 |     9685.891 |    10177.751 | 10176.955|
-+------------+-----------+--------------+--------------+----------+
++============+===========+==============+==============+===========+
+| ROV policy | Mean (ms) | Minimum (ms) | Maximum (ms) |  P95 (ms) |
++============+===========+==============+==============+===========+
+| Enabled    |       N/A |          N/A |          N/A |       N/A |
++------------+-----------+--------------+--------------+-----------+
+| Disabled   |  9962.983 |     9685.891 |    10177.751 | 10176.955 |
++------------+-----------+--------------+--------------+-----------+
+
 ~~~
+{: #fig-bgp-add-invalid title="BGP convergence with ROV enabled and disabled: Add Invalid."}
 
 **Invalid to Valid.**
 
@@ -917,7 +992,9 @@ This experiment implements the test in {{case-b-bgp-triggered-convergence-with-a
 +------------+-----------+--------------+--------------+----------+
 | Disabled   |  8011.848 |     8005.596 |     8031.975 | 8027.183 |
 +------------+-----------+--------------+--------------+----------+
+
 ~~~
+{: #fig-bgp-invalid-to-valid title="BGP convergence with ROV enabled and disabled: Invalid to Valid."}
 
 **Best to Invalid.**
 
@@ -929,14 +1006,16 @@ This experiment implements the test in {{case-b-bgp-triggered-convergence-with-a
 +------------+-----------+--------------+--------------+----------+
 | Disabled   |  8385.576 |     8006.559 |     9898.653 | 9520.511 |
 +------------+-----------+--------------+--------------+----------+
-~~~
 
-The mixed workload produces similar convergence times with ROV enabled and disabled. For Withdraw best and Add Valid, the operations have similar effects on route selection in both configurations, and the measured convergence times are also similar. For Add Invalid, ROV rejects the added routes, so no RIB or forwarding changes are observed with ROV enabled and no last-change latency is reported. The larger differences occur for Invalid to Valid and Best to Invalid: the validation-state transitions do not change route eligibility with ROV disabled, whereas they require route reselection with ROV enabled. These two workloads therefore show larger differences in convergence time between the configurations.
+~~~
+{: #fig-bgp-best-to-invalid title="BGP convergence with ROV enabled and disabled: Best to Invalid."}
+
+The mixed workload produces similar convergence times with ROV enabled and disabled ({{fig-bgp-mixed}}). For Withdraw best and Add Valid, the operations have similar effects on route selection in both configurations, and the measured convergence times are also similar ({{fig-bgp-withdraw-best}} and {{fig-bgp-add-valid}}). For Add Invalid, ROV rejects the added routes, so no RIB or forwarding changes are observed with ROV enabled and no last-change latency is reported ({{fig-bgp-add-invalid}}). The larger differences occur for Invalid to Valid ({{fig-bgp-invalid-to-valid}}) and Best to Invalid ({{fig-bgp-best-to-invalid}}): the validation-state transitions do not change route eligibility with ROV disabled, whereas they require route reselection with ROV enabled. These two workloads therefore show larger differences in convergence time between the configurations.
 
 ## Appendix B.8. VRP Scalability Tests {#report-vrp-scalability}
 {: numbered="false"}
 
-This experiment implements the scalability test in {{vrp-scalability-tests}} using 50k, 100k, 500k, and 1M initial VRPs, with 1,000 VRP operations at each scale. It measures initial synchronization, VRP update latency, validation latency after VRP installation, and BIRD CPU and memory consumption. Each condition is repeated ten times. The results are as follows.
+This experiment implements the scalability test in {{vrp-scalability-tests}} using 50k, 100k, 500k, and 1M initial VRPs, with 1,000 VRP operations at each scale. It measures initial synchronization, VRP update latency, validation latency after VRP installation, and BIRD CPU and memory consumption. Each condition is repeated ten times. The results are shown in {{fig-vrp-scalability}}.
 
 ~~~
 +==========+=================+==========+============+===========+===========+
@@ -953,11 +1032,13 @@ This experiment implements the scalability test in {{vrp-scalability-tests}} usi
 +----------+-----------------+----------+------------+-----------+-----------+
 | 1M       |         422.649 |   41.032 |   3099.493 |    70.451 |   562.093 |
 +----------+-----------------+----------+------------+-----------+-----------+
+
 ~~~
+{: #fig-vrp-scalability title="VRP scalability measurements."}
 
-The CPU column reports BIRD utilization during initial synchronization, with one fully occupied logical CPU equal to 100%. Memory is BIRD's steady-state resident set size (RSS). Values are reported as means across runs. In this test setup, ROV and BGP processing share a single BIRD process, so their resource usage cannot be measured separately and is reported for BIRD as a whole.
+The CPU column in {{fig-vrp-scalability}} reports BIRD utilization during initial synchronization, with one fully occupied logical CPU equal to 100%. Memory is BIRD's steady-state resident set size (RSS). Values are reported as means across runs. In this test setup, ROV and BGP processing share a single BIRD process, so their resource usage cannot be measured separately and is reported for BIRD as a whole.
 
-Initial synchronization and post-installation ROV validation take longer as the VRP table grows. Mean incremental VRP update latency ranges from 41.032 to 49.258 ms, similar to the results of the update-processing test ({{report-vrp-update}}). Mean BIRD CPU utilization during synchronization rises from 38.4% to 70.5%, while steady-state RSS increases from 463 MiB to 562 MiB. RSS varies little across repeated runs at each scale.
+As shown in {{fig-vrp-scalability}}, initial synchronization and post-installation ROV validation take longer as the VRP table grows. Mean incremental VRP update latency ranges from 41.032 to 49.258 ms, similar to the update-processing results in {{fig-vrp-update-latency}}. Mean BIRD CPU utilization during synchronization rises from 38.4% to 70.5%, while steady-state RSS increases from 463 MiB to 562 MiB. RSS varies little across repeated runs at each scale.
 
 ## Appendix B.9. VRP Churn and Stress Tests {#report-vrp-churn}
 {: numbered="false"}
@@ -968,14 +1049,14 @@ In practice, continuous updates substantially affected the measurement process. 
 
 - Monitor selected batches rather than every batch: ROV, RIB, and FIB targets are selected from batches 10, 20, and every subsequent tenth batch through batch 300. VRP logs are collected for all batches.
 - Measure ROV and FIB in separate runs to reduce interference between CLI queries and forwarding probes.
-- Set ROA-table settle timers to zero to remove this additional waiting period.
+- Set ROA-table settle timers to zero for RIB and FIB measurements to remove the additional waiting period before route revalidation.
 - Check completion every five seconds and remove completed ROV/FIB targets to avoid continuing queries and probes for those targets.
 
 Monitoring continues across batch boundaries until the expected state is observed. For each component, the batch endpoint is the latest of the selected targets' first observations of their expected resulting states. A complete batch latency requires all selected targets to be observed. Collection ends after all updates have been submitted and all selected targets have completed, or when the overall timeout expires; final correctness checks follow collection.
 
 VRP latency starts at the Serial Notify send time because multiple batches may be combined into one RTR response, whose first Prefix PDU cannot provide a separate timing origin for each batch. ROV, RIB, and FIB post-installation latencies start at the last observed VRP change for the corresponding batch. All 30 selected batches at each size have complete ROV, RIB, and FIB matches.
 
-VRP latency:
+VRP latency is shown in {{fig-churn-vrp-latency}}.
 
 ~~~
 +============+=============+=============+=============+=============+=============+
@@ -990,8 +1071,9 @@ VRP latency:
 |   1,000    |    78.477   |   138.877   |    42.920   |   1901.677  |    76.311   |
 +------------+-------------+-------------+-------------+-------------+-------------+
 ~~~
+{: #fig-churn-vrp-latency title="VRP latency under continuous updates."}
 
-Post-installation ROV latency:
+Post-installation ROV latency is shown in {{fig-churn-rov-latency}}.
 
 ~~~
 +============+=============+=============+=============+=============+=============+
@@ -999,15 +1081,16 @@ Post-installation ROV latency:
 | operations |     (ms)    |     (ms)    |     (ms)    |     (ms)    |     (ms)    |
 | per batch  |             |             |             |             |             |
 +============+=============+=============+=============+=============+=============+
-|    100     |   331.377   |   260.100   |   103.695   |   1255.976  |   868.944   |
+|    100     |   348.373   |   333.814   |    10.100   |   1736.384  |   898.628   |
 +------------+-------------+-------------+-------------+-------------+-------------+
-|    500     |   714.867   |   320.528   |   464.179   |   2040.389  |   1171.388  |
+|    500     |   755.901   |   410.524   |   309.312   |   2469.823  |   1403.662  |
 +------------+-------------+-------------+-------------+-------------+-------------+
-|   1,000    |   1815.063  |   1103.538  |   686.447   |   4833.987  |   4185.087  |
+|   1,000    |   1477.077  |   869.270   |   227.354   |   3544.283  |   3031.084  |
 +------------+-------------+-------------+-------------+-------------+-------------+
 ~~~
+{: #fig-churn-rov-latency title="Post-installation ROV latency under continuous updates."}
 
-Post-installation RIB latency:
+Post-installation RIB latency is shown in {{fig-churn-rib-latency}}.
 
 ~~~
 +============+=============+=============+=============+=============+=============+
@@ -1022,8 +1105,9 @@ Post-installation RIB latency:
 |   1,000    |   3412.681  |   518.784   |   2099.247  |   4159.981  |   4117.594  |
 +------------+-------------+-------------+-------------+-------------+-------------+
 ~~~
+{: #fig-churn-rib-latency title="Post-installation RIB latency under continuous updates."}
 
-Post-installation FIB latency:
+Post-installation FIB latency is shown in {{fig-churn-fib-latency}}.
 
 ~~~
 +============+=============+=============+=============+=============+=============+
@@ -1038,8 +1122,9 @@ Post-installation FIB latency:
 |   1,000    |   4638.344  |   510.229   |   3190.433  |   5435.035  |   5357.773  |
 +------------+-------------+-------------+-------------+-------------+-------------+
 ~~~
+{: #fig-churn-fib-latency title="Post-installation FIB latency under continuous updates."}
 
-Additional single-batch tests measure VRP installation, ROV validation, and BGP convergence latency. Each test initializes the corresponding pre-update state, applies one batch, and measures VRP, ROV, RIB, and FIB latency. ROV and FIB are measured in separate runs, consistent with the continuous-update tests.
+Additional single-batch tests measure VRP installation, ROV validation, and BGP convergence latency. Each test initializes the corresponding pre-update state, applies one batch, and measures VRP, ROV, RIB, and FIB latency. ROV and FIB are measured in separate runs, consistent with the continuous-update tests. The latency comparison is shown in {{fig-churn-latency-comparison}}.
 
 ~~~
 +============+===================+===================+===================+===================+
@@ -1049,38 +1134,40 @@ Additional single-batch tests measure VRP installation, ROV validation, and BGP 
 +------------+---------+---------+---------+---------+---------+---------+---------+---------+
 |            |  Cont.  |  Single |  Cont.  |  Single |  Cont.  |  Single |  Cont.  |  Single |
 +============+=========+=========+=========+=========+=========+=========+=========+=========+
-|    100     |  69.234 |  44.654 | 331.377 |  20.659 | 2497.838| 1839.835| 3464.875| 2834.748|
+|    100     |  69.234 |  44.654 | 348.373 |  20.659 | 2497.838| 1839.835| 3464.875| 2834.748|
 +------------+---------+---------+---------+---------+---------+---------+---------+---------+
-|    500     |  74.930 |  45.496 | 714.867 |  48.868 | 3538.866| 2202.871| 4552.836| 3254.135|
+|    500     |  74.930 |  45.496 | 755.901 |  48.868 | 3538.866| 2202.871| 4552.836| 3254.135|
 +------------+---------+---------+---------+---------+---------+---------+---------+---------+
-|   1,000    |  78.477 |  46.229 | 1815.063|  63.922 | 3412.681| 2110.765| 4638.344| 3174.544|
+|   1,000    |  78.477 |  46.229 | 1477.077|  63.922 | 3412.681| 2110.765| 4638.344| 3174.544|
 +------------+---------+---------+---------+---------+---------+---------+---------+---------+
 ~~~
+{: #fig-churn-latency-comparison title="Latency comparison between continuous and single-batch updates."}
 
-The results show higher VRP, ROV, RIB, and FIB latencies under continuous updates than under single-batch updates. However, the measurement process itself also experienced delays during continuous updates. A monitoring round queries or probes all current targets once. The following table compares the average duration and target count of these rounds between continuous and single-batch tests. The averages use the first complete round after each selected batch adds its targets, including any unfinished targets from earlier batches.
+{{fig-churn-latency-comparison}} shows higher VRP, ROV, RIB, and FIB latencies under continuous updates than under single-batch updates. However, the measurement process itself also experienced delays during continuous updates. A monitoring round queries or probes all current targets once. {{fig-churn-monitoring-rounds}} compares the average duration and target count of these rounds between continuous and single-batch tests. The averages use the first complete round after each selected batch adds its targets, including any unfinished targets from earlier batches.
 
 ~~~
 +============+==============+=============+==============+=============+==============+
 | Operations | Update mode  |  ROV round  | ROV targets  |  FIB round  | FIB targets  |
 | per batch  |              |  time (ms)  |  per round   |  time (ms)  |  per round   |
 +============+==============+=============+==============+=============+==============+
-|    100     |  Continuous  |   318.845   |   321.933    |    37.509   |   162.300    |
+|    100     |  Continuous  |   269.888   |   321.933    |    37.509   |   162.300    |
 +------------+--------------+-------------+--------------+-------------+--------------+
 |    100     | Single-batch |    24.745   |   321.933    |    31.968   |   162.300    |
 +------------+--------------+-------------+--------------+-------------+--------------+
-|    500     |  Continuous  |   803.977   |   608.267    |    90.170   |   370.533    |
+|    500     |  Continuous  |   729.705   |   608.267    |    90.170   |   370.533    |
 +------------+--------------+-------------+--------------+-------------+--------------+
 |    500     | Single-batch |    46.149   |   608.267    |    71.983   |   367.367    |
 +------------+--------------+-------------+--------------+-------------+--------------+
-|   1,000    |  Continuous  |   2338.591  |   1796.900   |   370.557   |   1046.067   |
+|   1,000    |  Continuous  |   2502.206  |   1827.533   |   370.557   |   1046.067   |
 +------------+--------------+-------------+--------------+-------------+--------------+
 |   1,000    | Single-batch |    60.419   |   741.667    |    93.249   |   494.233    |
 +------------+--------------+-------------+--------------+-------------+--------------+
 ~~~
+{: #fig-churn-monitoring-rounds title="Monitoring round duration and target count for continuous and single-batch updates."}
 
-At 100 and 500 operations per batch, each ROV query round covers the same number of targets in continuous and single-batch tests, but takes substantially longer in the continuous tests. At 1,000 operations per batch, unfinished targets from earlier batches remain under monitoring alongside new targets; both ROV and FIB rounds cover more targets and take longer than in the single-batch tests. These results show higher observed latency under continuous updates, but the increase includes delays from the measurement process, preventing separate quantification of the increase in DUT processing latency.
+As shown in {{fig-churn-monitoring-rounds}}, at 100 and 500 operations per batch, each ROV query round covers the same number of targets in continuous and single-batch tests, but takes substantially longer in the continuous tests. At 1,000 operations per batch, unfinished targets from earlier batches remain under monitoring alongside new targets; both ROV and FIB rounds cover more targets and take longer than in the single-batch tests. Together, {{fig-churn-latency-comparison}} and {{fig-churn-monitoring-rounds}} show higher observed latency under continuous updates, but the increase includes delays from the measurement process, preventing separate quantification of the increase in DUT processing latency.
 
-Update delivery is also affected. The following table shows how the interval between Serial Notify transmissions changes as the workload progresses.
+Update delivery is also affected. {{fig-churn-notify-intervals}} shows how the interval between Serial Notify transmissions changes as the workload progresses.
 
 ~~~
 +==============+=================================================================+
@@ -1096,13 +1183,14 @@ Update delivery is also affected. The following table shows how the interval bet
 |    1,000     |        1.008        |        1.277        |        2.087        |
 +--------------+---------------------+---------------------+---------------------+
 ~~~
+{: #fig-churn-notify-intervals title="Serial Notify transmission intervals during continuous updates."}
 
-Notify transmission remains close to the configured one-second interval at 100 and 500 operations per batch. At 1,000 operations per batch, the interval grows as the test progresses, exceeding two seconds on average in the final portion. The RTR source therefore falls behind the submission schedule at the highest load, alongside the slowdown in state observation.
+The Serial Notify transmission intervals in {{fig-churn-notify-intervals}} remain close to the configured one-second interval at 100 and 500 operations per batch. At 1,000 operations per batch, the interval grows as the test progresses, exceeding two seconds on average in the final portion. The RTR source therefore falls behind the submission schedule at the highest load, alongside the slowdown in state observation.
 
 ## Appendix B.10. Resource Utilization {#report-resource-utilization}
 {: numbered="false"}
 
-This experiment implements the resource-utilization test in {{resource-utilization}} using the multi-batch VRP update dataset. It replays the first 60 batches of the workload targeting 100 VRP operations per batch, with batches submitted at one-second intervals. System and BIRD CPU and memory are measured during initial synchronization, idle operation, and updates with convergence. The results are as follows.
+This experiment implements the resource-utilization test in {{resource-utilization}} using the multi-batch VRP update dataset. It replays the first 60 batches of the workload targeting 100 VRP operations per batch, with batches submitted at one-second intervals. System and BIRD CPU and memory are measured during initial synchronization, idle operation, and updates with convergence. The results are shown in {{fig-resource-cpu}} and {{fig-resource-memory}}.
 
 ~~~
 +==================================+=====================+===================+
@@ -1115,7 +1203,9 @@ This experiment implements the resource-utilization test in {{resource-utilizati
 +----------------------------------+---------------------+-------------------+
 | Updates and convergence          |             228.661 |            73.150 |
 +----------------------------------+---------------------+-------------------+
+
 ~~~
+{: #fig-resource-cpu title="System and BIRD CPU utilization by experimental phase."}
 
 ~~~
 +=================+=============+==============+==============+==============+
@@ -1133,17 +1223,19 @@ This experiment implements the resource-utilization test in {{resource-utilizati
 | Updates and     |    7531.922 |     7633.124 |      503.106 |      503.501 |
 | convergence     |             |              |              |              |
 +-----------------+-------------+--------------+--------------+--------------+
+
 ~~~
+{: #fig-resource-memory title="System memory consumption and BIRD RSS by experimental phase."}
 
 
-Both CPU columns use one fully occupied logical CPU as 100%; system CPU can exceed 100%. The tables report means over runs, and the memory peak column is the mean of each run's sampled phase peak. Hardware performance counters are not included in this WSL2 campaign. In this test setup, ROV and BGP processing share a single BIRD process, so their resource usage cannot be measured separately and is reported for BIRD as a whole.
+Both CPU columns use one fully occupied logical CPU as 100%; system CPU can exceed 100%. {{fig-resource-cpu}} and {{fig-resource-memory}} report means over runs, and the memory peak column is the mean of each run's sampled phase peak. Hardware performance counters are not included in this WSL2 campaign. In this test setup, ROV and BGP processing share a single BIRD process, so their resource usage cannot be measured separately and is reported for BIRD as a whole.
 
-BIRD CPU utilization is low during the idle phase and rises during synchronization and continuous updates. Mean utilization reaches 73.2% during updates and convergence, compared with 1.5% while idle. BIRD RSS remains close to 502–503 MiB between the idle and update phases, while system memory consumption increases.
+In {{fig-resource-cpu}}, BIRD CPU utilization is low during the idle phase and rises during synchronization and continuous updates. Mean utilization reaches 73.2% during updates and convergence, compared with 1.5% while idle. BIRD RSS in {{fig-resource-memory}} remains close to 502–503 MiB between the idle and update phases, while system memory consumption increases.
 
 ## Appendix B.11. RTR Session Behavior Tests {#report-rtr-session}
 {: numbered="false"}
 
-These experiments implement Scenarios 1, 3, and 4 of {{rtr-session-behavior-tests}}. Scenarios 1 and 4 use 500k initial VRPs; Scenario 3 uses 50k, 100k, 500k, and 1M. Each input contains 1,000 VRP operations. Measurements cover RTR recovery, full resynchronization, malformed-update handling, and the resulting ROV, RIB, and FIB changes. Scenario 2 is not performed, as explained below.
+These experiments implement Scenarios 1, 3, and 4 of {{rtr-session-behavior-tests}}. Scenarios 1 and 4 use 500k initial VRPs; Scenario 3 uses 50k, 100k, 500k, and 1M. Each input contains 1,000 VRP operations. Measurements cover RTR recovery, full resynchronization, malformed-update handling, and the resulting ROV, RIB, and FIB changes. Scenario 2 is not performed, as explained below. The scenario triggers and timer origins are summarized in {{fig-rtr-scenarios}}.
 
 ~~~
 +======================+==========================+========================+
@@ -1160,20 +1252,23 @@ These experiments implement Scenarios 1, 3, and 4 of {{rtr-session-behavior-test
 |                      | with type 255 for errors |                        |
 +----------------------+--------------------------+------------------------+
 ~~~
+{: #fig-rtr-scenarios title="RTR session test scenarios, triggers, and timer origins."}
 
 **Scenario 1: Session reset test.**
 
 ~~~
-+=========+============+==========+==============+============+===================+
-| Initial | New        | RTR      | VRP          | ROV        | Post-installation |
-| VRPs    | connection | recovery | installation | completion | RIB/FIB           |
-|         | (ms)       | (ms)     | (ms)         | (ms)       | convergence (ms)  |
-+=========+============+==========+==============+============+===================+
-| 500k    |   1000.291 | 15568.829|    15588.969 |  17378.615 |          5692.486 |
-+---------+------------+----------+--------------+------------+-------------------+
-~~~
++=========+============+===========+==============+============+===================+
+| Initial | New        | RTR       | VRP          | ROV        | Post-installation |
+| VRPs    | connection |  recovery | installation | completion | RIB/FIB           |
+|         | (ms)       | (ms)      | (ms)         | (ms)       |  convergence (ms) |
++=========+============+===========+==============+============+===================+
+| 500k    |   1000.291 | 15568.829 |    15588.969 |  17378.615 |          5692.486 |
++---------+------------+-----------+--------------+------------+-------------------+
 
-The first four latency columns start at disconnect completion. New connection ends when BRIO registers BIRD's new TCP connection; RTR recovery ends when BIRD's RTR session is observed to return to the Established state. The last column starts at VRP installation completion. A new connection is established after approximately 1.00 s, while RTR recovery and VRP installation complete after approximately 15.57 s and 15.59 s. ROV completion follows at 17.38 s, and the post-installation RIB/FIB convergence interval averages 5.69 s.
+~~~
+{: #fig-rtr-session-recovery title="RTR session reset and recovery results."}
+
+The first four latency columns in {{fig-rtr-session-recovery}} start at disconnect completion. New connection ends when BRIO registers BIRD's new TCP connection; RTR recovery ends when BIRD's RTR session is observed to return to the Established state. The last column starts at VRP installation completion. A new connection is established after approximately 1.00 s, while RTR recovery and VRP installation complete after approximately 15.57 s and 15.59 s. ROV completion follows at 17.38 s, and the post-installation RIB/FIB convergence interval averages 5.69 s.
 
 **Scenario 2: Cache failover test.**
 
@@ -1188,17 +1283,19 @@ The cache failover test in {{rtr-session-behavior-tests}} requires a switch from
 |          | (ms)     | convergence | convergence (ms)  |             |
 |          |          | (ms)        |                   |             |
 +==========+==========+=============+===================+=============+
-| 50k      |  160.380 |    4394.699 |          4234.319 |       10/10 |
+| 50k      |  160.380 |    4394.699 |          4234.319 | 10/10       |
 +----------+----------+-------------+-------------------+-------------+
-| 100k     |  313.001 |    4986.441 |          4673.440 |       10/10 |
+| 100k     |  313.001 |    4986.441 |          4673.440 | 10/10       |
 +----------+----------+-------------+-------------------+-------------+
-| 500k     | 1605.430 |    6794.705 |          5189.275 |       10/10 |
+| 500k     | 1605.430 |    6794.705 |          5189.275 | 10/10       |
 +----------+----------+-------------+-------------------+-------------+
-| 1M       | 3472.341 |    8575.873 |          5103.532 |       10/10 |
+| 1M       | 3472.341 |    8575.873 |          5103.532 | 10/10       |
 +----------+----------+-------------+-------------------+-------------+
-~~~
 
-Mean full VRP reload time increases from 160.380 ms at 50k VRPs to 3472.341 ms at 1M, similar to the full-table resynchronization results of the update-processing test ({{report-vrp-update}}). Mean end-to-end RIB/FIB convergence increases from 4.395 s to 8.576 s, while mean post-installation convergence ranges from 4.234 s to 5.189 s. Final-state consistency checks pass in all ten runs at every scale.
+~~~
+{: #fig-rtr-resynchronization title="Full VRP resynchronization and BGP convergence."}
+
+In {{fig-rtr-resynchronization}}, mean full VRP reload time increases from 160.380 ms at 50k VRPs to 3472.341 ms at 1M, similar to the full-table resynchronization results in {{fig-vrp-update-latency}}. Mean end-to-end RIB/FIB convergence increases from 4.395 s to 8.576 s, while mean post-installation convergence ranges from 4.234 s to 5.189 s. Final-state consistency checks pass in all ten runs at every scale.
 
 **Scenario 4: Incremental update performance.**
 
@@ -1227,6 +1324,8 @@ Mean full VRP reload time increases from 160.380 ms at 50k VRPs to 3472.341 ms a
 +-----------------------------+----------------+-----------------------------+
 | Final ROV states correct    |          10/10 |                       10/10 |
 +-----------------------------+----------------+-----------------------------+
-~~~
 
-Normal updates complete VRP installation, ROV validation, and RIB/FIB convergence with mean latencies of 126.986 ms, 1.587 s, and 6.269 s, respectively. In all ten malformed-update runs, the DUT sends an Error Report, closes the RTR connection, and completes authorization cleanup. Final VRP and ROV checks pass for both groups.
+~~~
+{: #fig-rtr-malformed-updates title="Normal and malformed incremental update results."}
+
+In {{fig-rtr-malformed-updates}}, normal updates complete VRP installation, ROV validation, and RIB/FIB convergence with mean latencies of 126.986 ms, 1.587 s, and 6.269 s, respectively. In all ten malformed-update runs, the DUT sends an Error Report, closes the RTR connection, and completes authorization cleanup. Final VRP and ROV checks pass for both groups.
