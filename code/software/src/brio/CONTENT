@@ -1,0 +1,42 @@
+This folder contains NIST BRIO Software Suite Vb7.1.2
+ * srx-crypto-api V0.3.0.7_release
+ * bgprpki-io version_b0.7.0.1
+ * brio-examples b0.7.1.2_release
+The software is tested on Rocky 9, Ubuntu 22.04.
+For the latest requirements, see the dependencies folder which lists
+the current dependencies. The .req files located in the dependencies
+folder files are used by the install_dependencies.sh script and are
+tested using the operating systems minimal installs.
+
+Comments for this software package:
+===================================
+* srx-crypto-api 0.3.0.7_release developed and tested under CentOS, Rocky 9 and Ubuntu 22.04.
+  - requires gcc
+  - requires libconfig-devel
+  - requires openssl-devel
+  - requires uthash-devel
+* bgprpki-io version_b0.7.0.1 developed and tested under Rocky 9 and Ubuntu 22.04
+  - requires gcc
+  - requires libconfig-devel
+  - requires openssl-devel
+  - requires readline-devel
+* examples b0.7.1.2_release developed and tested under under CentOS, Rocky 9, and Ubuntu 22.04
+  Contains example scripts as well as example keys for BRIO, and SCA.
+  - requires epel-release
+  - requires sed
+  - requires screen
+  - requires gawk
+  - requires bind-utils
+  - requires net-tools
+  - requires bind-libs
+  - requires file
+  - requires sudo
+  - requires telnet
+  - requires wget
+  - requires bgpdump
+  - requires libbgpdump
+  - optional gnome-terminal
+  - optional python3
+
+-------------------------------------------------------------------------------
+Packaged by BGP-SRx Software Suite Bundler V9.4.7

@@ -1,0 +1,123 @@
+/*
+ * BNG Blaster (BBL) - A10NSP Functions
+ *
+ * Christian Giese, September 2021
+ *
+ * Copyright (C) 2020-2026, RtBrick, Inc.
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+
+#ifndef __BBL_A10NSP_H__
+#define __BBL_A10NSP_H__
+
+#define A10NSP_PPPOE_SERVICE_NAME   "access"
+#define A10NSP_PPPOE_AC_NAME        "BNG-Blaster-A10NSP"
+#define A10NSP_REPLY_MESSAGE        "BNG-Blaster-A10NSP"
+
+typedef struct bbl_a10nsp_interface_
+{
+    char *name; /* interface name */
+    uint32_t ifindex; /* interface index */
+
+    /* parent */
+    bbl_interface_s *interface; 
+
+    /* A10NSP interface is emulate over network interface */
+    bbl_network_interface_s *network_interface;
+    uint32_t tx_label;
+
+    bbl_txq_s *txq;
+
+    uint8_t mac[ETH_ADDR_LEN];
+    bool qinq;
+
+    struct {
+        uint64_t packets_tx;
+        uint64_t packets_rx;
+        uint64_t bytes_tx;
+        uint64_t bytes_rx;
+        
+        uint64_t unknown;
+
+        uint64_t session_ipv4_tx;
+        uint64_t session_ipv4_rx;
+        uint64_t session_ipv4_loss;
+        uint64_t session_ipv6_tx;
+        uint64_t session_ipv6_rx;
+        uint64_t session_ipv6_loss;
+        uint64_t session_ipv6pd_tx;
+        uint64_t session_ipv6pd_rx;
+        uint64_t session_ipv6pd_loss;
+
+        uint64_t stream_tx;
+        uint64_t stream_rx;
+        uint64_t stream_loss;
+
+        /* Rate Stats */
+
+        bbl_rate_s rate_packets_tx;
+        bbl_rate_s rate_packets_rx;
+        bbl_rate_s rate_bytes_tx;
+        bbl_rate_s rate_bytes_rx;
+        bbl_rate_s rate_session_ipv4_tx;
+        bbl_rate_s rate_session_ipv4_rx;
+        bbl_rate_s rate_session_ipv6_tx;
+        bbl_rate_s rate_session_ipv6_rx;
+        bbl_rate_s rate_session_ipv6pd_tx;
+        bbl_rate_s rate_session_ipv6pd_rx;
+        bbl_rate_s rate_stream_tx;
+        bbl_rate_s rate_stream_rx;
+    } stats;
+
+    struct timer_ *rate_job;
+
+    CIRCLEQ_ENTRY(bbl_a10nsp_interface_) a10nsp_interface_qnode;
+    CIRCLEQ_HEAD(session_tx_a10nsp_, bbl_session_ ) session_tx_qhead; /* list of sessions that want to transmit */
+} bbl_a10nsp_interface_s;
+
+typedef struct bbl_a10nsp_session_
+{
+    bbl_session_s *session;
+    bbl_a10nsp_interface_s *a10nsp_interface;
+    uint16_t s_vlan; /* outer */
+    uint16_t c_vlan; /* inner */
+
+    bool qinq_received;
+
+    uint32_t ipv4_address;
+    uint32_t label;
+
+    char *pppoe_ari;
+    char *pppoe_aci;
+    char *dhcp_ari;
+    char *dhcp_aci;
+    char *dhcpv6_ari;
+    char *dhcpv6_aci;
+
+    struct {
+        uint64_t packets_tx;
+        uint64_t packets_rx;
+    } stats;
+
+} bbl_a10nsp_session_s;
+
+void
+bbl_a10nsp_interface_rate_job(timer_s *timer);
+
+bool
+bbl_a10nsp_interfaces_add();
+
+bbl_a10nsp_interface_s*
+bbl_a10nsp_interface_get(char *interface_name);
+
+void
+bbl_a10nsp_session_free(bbl_session_s *session);
+
+void
+bbl_a10nsp_rx_handler(bbl_a10nsp_interface_s *interface,
+                      bbl_ethernet_header_s *eth);
+
+int
+bbl_a10nsp_ctrl_interfaces(int fd, uint32_t session_id __attribute__((unused)), json_t *arguments __attribute__((unused)));
+
+#endif

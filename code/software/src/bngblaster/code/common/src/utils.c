@@ -1,0 +1,799 @@
+/*
+ * Utils
+ *
+ * Hannes Gredler, July 2020
+ * Christian Giese, October 2020
+ *
+ * Copyright (C) 2020-2026, RtBrick, Inc.
+ * SPDX-License-Identifier: BSD-3-Clause
+ */
+#include "utils.h"
+#include <sys/utsname.h>
+
+/*
+ * Get linux kernel version major, minor and patch number.
+ */
+kernel_version_s
+get_kernel_version(void)
+{
+    struct utsname buffer;
+    kernel_version_s kv = {0, 0, 0};
+
+    if (uname(&buffer) != 0) {
+        return kv; // returns zeros on failure
+    }
+
+    sscanf(buffer.release, "%u.%u.%u",
+           &kv.major,
+           &kv.minor,
+           &kv.patch);
+
+    return kv;
+}
+
+/*
+ * Simple big endian reader.
+ */
+uint64_t
+read_be_uint(uint8_t *data, size_t length)
+{
+    uint32_t idx;
+    uint64_t value = 0;
+
+    if (!length || length > sizeof(value)) {
+        return 0;
+    }
+    for (idx = 0; idx < length; idx++) {
+        value <<= 8;
+        value = value | *(data+idx);
+    }
+    return value;
+}
+
+/*
+ * Simple big endian writer.
+ */
+bool
+write_be_uint(uint8_t *data, size_t length, uint64_t value)
+{
+    uint32_t idx;
+
+    if (!length || length > 8) {
+        return false;
+    }
+
+    for (idx = 0; idx < length; idx++) {
+        data[length - idx -1] =  value & 0xff;
+        value >>= 8;
+    }
+    return true;
+}
+
+/*
+ * Increment a big endian number.
+ */
+bool
+inc_be_uint(uint8_t *data, size_t length)
+{
+    uint64_t value;
+
+    value = read_be_uint(data, length) + 1;
+    return write_be_uint(data, length, value);
+}
+
+/*
+ * Push a big endian integer to the write buffer and update the cursor.
+ */
+bool
+push_be_uint(io_buffer_t *buffer, size_t length, uint64_t value)
+{
+    /*
+     * Buffer overrun protection.
+     */
+    if ((buffer->idx + length) > buffer->size) {
+        return false;
+    }
+
+    /*
+     * Write the data.
+     */
+    write_be_uint(buffer->data + buffer->idx, length, value);
+
+    /*
+     * Adjust the cursor.
+     */
+    buffer->idx += length;
+    return true;
+}
+
+/*
+ * Push a continuous set of data to the write buffer and update the cursor.
+ */
+bool
+push_data(io_buffer_t *buffer, uint8_t *data, size_t length)
+{
+    /*
+     * Buffer overrun protection.
+     */
+    if ((buffer->idx + length) > buffer->size) {
+        return false;
+    }
+
+    /*
+     * Copy the data.
+     */
+    memcpy(buffer->data + buffer->idx, data, length);
+
+    /*
+     * Adjust the cursor.
+     */
+    buffer->idx += length;
+    return true;
+}
+
+/*
+ * Simple little endian writer.
+ */
+bool
+write_le_uint(uint8_t *data, uint32_t length, uint64_t value)
+{
+    uint32_t idx;
+
+    if (!length || length > 8) {
+        return false;
+    }
+
+    for (idx = 0; idx < length; idx++) {
+        data[idx] = value & 0xff;
+        value >>= 8;
+    }
+    return true;
+}
+
+/*
+ * Push a little endian integer to the write buffer and update the cursor.
+ */
+bool
+push_le_uint(io_buffer_t *buffer, uint32_t length, uint64_t value)
+{
+    /*
+     * Buffer overrun protection.
+     */
+    if ((buffer->idx + length) > buffer->size) {
+        return false;
+    }
+
+    /*
+     * Write the data.
+     */
+    write_le_uint(buffer->data + buffer->idx, length, value);
+
+    /*
+     * Adjust the cursor.
+     */
+    buffer->idx += length;
+    return true;
+}
+
+const char *
+val2key(struct keyval_ *keyval, uint32_t val) 
+{
+    int idx;
+    idx = 0;
+    while (keyval[idx].key) {
+        if (val == keyval[idx].val) {
+            return keyval[idx].key;
+        }
+        idx++;
+    }
+    return "Unknown";
+}
+
+uint32_t
+key2val(struct keyval_ *ptr, const char *key)
+{
+    while (ptr->key) {
+        if (strcmp(ptr->key, key) == 0) {
+            return ptr->val;
+        }
+        ptr++;
+    }
+    return 0;
+}
+
+const char *
+keyval_get_key (struct keyval_ *keyval, uint32_t val)
+{
+    struct keyval_ *ptr;
+
+    ptr = keyval;
+    while (ptr->key) {
+        if (ptr->val == val) {
+            return ptr->key;
+        }
+        ptr++;
+    }
+    return "unknown";
+}
+
+/**
+ * format_mac_address
+ *
+ * Format an MAC address as string in one of 16 static buffers.
+ *
+ * @param mac MAC address bytes
+ * @return MAC address string
+ */
+char *
+format_mac_address(uint8_t *mac) 
+{
+    static char buffer[16][MAC_STR_LEN];
+    static int idx = 0;
+    char *ret;
+    ret = buffer[idx];
+    idx = (idx+1) & 15;
+    snprintf(ret, MAC_STR_LEN, "%02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    return ret;
+}
+
+/**
+ * format_ipv4_address
+ *
+ * Format an IPv4 address as string in one of 32 static buffers.
+ *
+ * @param addr4 IPv4 address bytes
+ * @return IPv4 address string
+ */
+char *
+format_ipv4_address(uint32_t *addr4)
+{
+    static char buffer[32][IPV4_DOTTED_STR_LEN];
+    static int idx = 0;
+    char *ret;
+    ret = buffer[idx];
+    *ret = '\0';
+    idx = (idx+1) & 31;
+    inet_ntop(AF_INET, addr4, ret, IPV4_DOTTED_STR_LEN);
+    return ret;
+}
+
+/**
+ * format_ipv4_prefix
+ *
+ * Format an IPv4 prefix as string in one of 16 static buffers.
+ *
+ * @param addr4 IPv4 prefix bytes
+ * @return IPv4 prefix string
+ */
+char *
+format_ipv4_prefix(ipv4_prefix *addr4)
+{
+    static char buffer[16][IPV4_DOTTED_PREFIX_STR_LEN];
+    static int idx = 0;
+    char *ret;
+    ret = buffer[idx];
+    *ret = '\0';
+    idx = (idx+1) & 15;
+    inet_ntop(AF_INET, &addr4->address, ret, IPV4_DOTTED_STR_LEN);
+    snprintf(ret + strlen(ret), 5, "/%d", addr4->len);
+    return ret;
+}
+
+/**
+ * format_ipv6_address
+ *
+ * Format an IPv6 address as string in one of 16 static buffers.
+ *
+ * @param addr6 IPv6 address bytes
+ * @return IPv6 address string
+ */
+char *
+format_ipv6_address(ipv6addr_t *addr6)
+{
+    static char buffer[16][IPV6_STR_LEN];
+    static int idx = 0;
+    char *ret;
+    ret = buffer[idx];
+    *ret = '\0';
+    idx = (idx+1) & 15;
+    inet_ntop(AF_INET6, addr6, ret, IPV6_STR_LEN);
+    return ret;
+}
+
+/**
+ * format_ipv6_prefix
+ *
+ * Format an IPv6 prefix as string in one of 16 static buffers.
+ *
+ * @param addr6 IPv6 prefix bytes
+ * @return IPv6 prefix string
+ */
+char *
+format_ipv6_prefix(ipv6_prefix *addr6)
+{
+    static char buffer[16][IPV6_PREFIX_STR_LEN];
+    static int idx = 0;
+    char *ret;
+    ret = buffer[idx];
+    *ret = '\0';
+    idx = (idx+1) & 15;
+    inet_ntop(AF_INET6, addr6->address, ret, IPV6_STR_LEN);
+    snprintf(ret + strlen(ret), 5, "/%d", addr6->len);
+    return ret;
+}
+
+/**
+ * format_iso_prefix
+ *
+ * Format an ISO prefix as string in one of 16 static buffers.
+ *
+ * @param iso ISO prefix structure
+ * @return ISO prefix string
+ */
+char *
+format_iso_prefix(iso_prefix *iso)
+{
+    char hextable[] = "0123456789abcdef";
+    uint8_t hi_byte, lo_byte;
+    uint16_t i, buf_idx, prefix_len;
+
+    static char buffer[16][ISO_STR_LEN];
+    static int idx = 0;
+    char *ret;
+
+    ret = buffer[idx];
+    *ret = '\0';
+    idx = (idx+1) & 15;
+
+    if (iso->len > (sizeof(iso->address)*8)) {
+        return ret;
+    }
+
+    buf_idx = 0;
+    prefix_len = (iso->len+7)/8;
+    for (i = 0; i < prefix_len; i++) {
+        hi_byte = iso->address[i] >> 4;
+        lo_byte = iso->address[i] & 0xf;
+
+        ret[buf_idx++] = hextable[hi_byte];
+        ret[buf_idx++] = hextable[lo_byte];
+
+        if (((i & 1) == 0) && (i + 1 < prefix_len)) {
+            ret[buf_idx++] = '.';
+        }
+    }
+    snprintf(ret+buf_idx, ISO_STR_LEN-buf_idx, "/%u", iso->len);
+    return ret;
+}
+
+/**
+ * scan_ipv4_prefix
+ *
+ * Scan an IPv4 prefix from string into prefix structure.
+ *
+ * @param str IPv4 source string
+ * @param ipv4 IPv4 target structure
+ * @return true if successfully
+ */
+bool
+scan_ipv4_prefix(const char *str, ipv4_prefix *ipv4) 
+{
+    char *s = strdup(str);
+    char *p;
+    int   r = 0;
+
+    p = strchr(s, '/');
+    if(p) {
+        sscanf(p, "/%hhu", &ipv4->len);
+        *p = '\0';
+        if(ipv4->len > 32) {
+            free(s);
+            return false;
+        }
+    } else {
+        ipv4->len = 24;
+    }
+
+    r = inet_pton(AF_INET, s, &ipv4->address);
+    free(s);
+    if(!r) {
+        return false;
+    }
+    return true;
+}
+
+/**
+ * scan_ipv4_address
+ *
+ * Scan an IPv4 address from string into address structure.
+ *
+ * @param str IPv4 source string
+ * @param ipv4 IPv4 target structure
+ * @return true if successfully
+ */
+bool
+scan_ipv4_address(const char *str, uint32_t *ipv4) 
+{
+    if(!inet_pton(AF_INET, str, ipv4)) {
+        return false;
+    }
+    return true;
+}
+
+/**
+ * scan_ipv6_prefix
+ *
+ * Scan an IPv6 prefix from string into prefix structure.
+ *
+ * @param str IPv6 source string
+ * @param ipv6 IPv6 target structure
+ * @return true if successfully
+ */
+bool
+scan_ipv6_prefix(const char *str, ipv6_prefix *ipv6)
+{
+    char *s = strdup(str);
+    char *p;
+    int   r;
+
+    p = strchr(s, '/');
+    if(p) {
+        sscanf(p, "/%hhu", &ipv6->len);
+        *p = '\0';
+        if(ipv6->len > 128) {
+            free(s);
+            return false;
+        }
+    } else {
+        ipv6->len = 64;
+    }
+
+    r = inet_pton(AF_INET6, s, &ipv6->address);
+    free(s);
+    if(!r) {
+        return false;
+    }
+    return true;
+}
+
+/**
+ * scan_ipv6_address
+ *
+ * Scan an IPv6 address from string into address structure.
+ *
+ * @param str IPv6 source string
+ * @param ipv6 IPv6 target structure
+ * @return true if successfully
+ */
+bool
+scan_ipv6_address(const char *str, ipv6addr_t *ipv6)
+{
+    if(!inet_pton(AF_INET6, str, ipv6)) {
+        return false;
+    }
+    return true;
+}
+
+/**
+ * scan_iso_prefix
+ *
+ * Scan an ISO prefix from string into prefix structure.
+ *
+ * @param str ISO source string
+ * @param iso ISO target structure
+ * @return true if successfully
+ */
+bool
+scan_iso_prefix(const char *str, iso_prefix *iso)
+{
+    char *tok;
+    char *save = NULL;
+    char *s;
+    char  c;
+
+    uint16_t idx;
+    uint16_t len;
+    uint16_t digit = 0;
+    uint16_t val = 0;
+    uint16_t prefix_idx = 0;
+
+    if(!(str && iso)) {
+        return false;
+    }
+
+    s = strdup(str);
+
+    memset(iso, 0, sizeof(iso_prefix));
+    tok = strtok_r(s, "/", &save);
+    if (!tok) {
+        free(s);
+        return false;
+    }
+
+    len = strlen(s);
+    for (idx = 0; idx < len; idx++) {
+
+        c = s[idx];
+
+        if (c >= '0' && c <= '9') {
+            val = (val << 4) | (c - '0');
+            digit++;
+        }
+        if (c >= 'a' && c <= 'f') {
+            val = (val << 4) | (c - 'a');
+            digit++;
+        }
+        if (c >= 'A' && c <= 'F') {
+            val = (val << 4) | (c - 'A');
+            digit++;
+        }
+
+        if (prefix_idx >= sizeof(iso->address)) {
+            free(s);
+            return false;
+        }
+
+        if (digit == 2) {
+            iso->address[prefix_idx++] = (val & 0xff);
+            digit = 0;
+        }
+    }
+
+    tok = strtok_r(NULL, "/", &save);
+    if (tok) {
+        iso->len = atoi(tok);
+    }
+    free(s);
+    return true;
+}
+
+/**
+ * Parses a hex string into binary bytes (uint8_t array), returns written bytes.
+ * Supports lowercase/uppercase hex digits (0-9a-fA-F), ignores non-hex chars.
+ * Stops at out_len (no partial bytes on overflow).
+ *
+ * @param s Input hex string (e.g., "1a2b3c", "1 A 2 B  cc")
+ * @param data Output buffer for parsed bytes
+ * @param length Max bytes to write (>=1)
+ * @return Number of bytes written (>=0) on success and -1 on error
+ */
+int
+scan_hex_string(const char *str, uint8_t *data, size_t length)
+{
+    size_t count = 0;
+    int high = -1;
+    int val;
+
+    if (!str || !data || !length) {
+        return -1;
+    }
+
+    for(; *str; str++) {
+        /* Decode hex digit */
+        if(*str >= '0' && *str <= '9') {
+            val = *str - '0';
+        } else if(*str >= 'a' && *str <= 'f') {
+            val = *str - 'a' + 10;
+        } else if(*str >= 'A' && *str <= 'F') {
+            val = *str - 'A' + 10;
+        } else {
+            /* Skip whitespace/non-hex */
+            continue;
+        }
+        /* State machine: high nibble -> low nibble -> byte */
+        if(high < 0) {
+            high = val;
+        } else {
+            if (count >= length) {
+                return -1;  // Buffer overflow
+            }
+            data[count++] = (uint8_t)((high << 4) | val);
+            high = -1;
+        }
+    }
+
+    /* Fail if trailing high nibble (odd hex count). */
+    if(high >= 0) {
+        return -1;
+    }
+
+    return (int)count;  // Success: bytes written
+}
+
+/**
+ * ipv4_multicast_mac
+ *
+ * @param ipv4 IPv4 multicast address
+ * @param mac target buffer to store multicast MAC
+ */
+void
+ipv4_multicast_mac(const uint32_t ipv4, uint8_t* mac) 
+{
+    *(uint32_t*)(&mac[2]) = ipv4;
+    mac[0] = 0x01;
+    mac[1] = 0x00;
+    mac[2] = 0x5e;
+    mac[3] &= 0x7f;
+}
+
+/**
+ * ipv6_multicast_mac
+ *
+ * @param ipv6 IPv6 multicast address
+ * @param mac target buffer to store multicast MAC
+ */
+void
+ipv6_multicast_mac(const uint8_t *ipv6, uint8_t* mac) 
+{
+    *(uint32_t*)(&mac[2]) =*(uint32_t*)(&ipv6[12]);
+    mac[0] = 0x33;
+    mac[1] = 0x33;
+}
+
+/**
+ * ipv6_addr_not_zero
+ *
+ * @param addr IPv6 address
+ * @return true if IPv6 is not zero (!::)
+ */
+bool
+ipv6_addr_not_zero(ipv6addr_t *addr)
+{
+    if(addr && (*(uint64_t *)addr != 0 ||*((uint64_t *)addr + 1) != 0 )) {
+        return true;
+    }
+    return false;
+}
+
+/**
+ * ipv6_prefix_not_zero
+ *
+ * @param prefix IPv6 prefix
+ * @return true if IPv6 prefix length and address are not zero (!::/0)
+ */
+bool
+ipv6_prefix_not_zero(ipv6_prefix *prefix) 
+{
+    /* check if pointer and prefix length */
+    if(prefix && *(uint8_t*)prefix > 0) {
+        return ipv6_addr_not_zero((ipv6addr_t *)prefix+1);
+    }
+    return false;
+}
+
+/**
+ * replace_substring
+ *
+ * Replace subscrtring in one of 4 static buffers.
+ *
+ * @param source source string
+ * @param old subsctring to search for
+ * @param new subsctring to replace with
+ * @return new string
+ */
+char *
+replace_substring(const char* source,
+                  const char* old,
+                  const char* new)
+{
+    if(!(source && old && new)) {
+        return NULL;
+    }
+
+    static char buffer[4][SUB_STR_LEN];
+    static int idx = 0;
+    char  *result = buffer[idx];
+    char  *result_pos = result;
+    size_t result_len = 0;
+
+    idx = (idx+1) & 3;
+
+    size_t new_len = strlen(new);
+    size_t old_len = strlen(old);
+
+    const char *cur = source;
+    const char *sub;
+    size_t c;
+
+    while(cur && *cur != '\0') {
+        sub = strstr(cur, old);
+        if(sub) {
+            c = sub - cur;
+            result_len += c + new_len;
+            if(result_len < SUB_STR_LEN) {
+                memcpy(result_pos, cur, c);
+                result_pos += c;
+                memcpy(result_pos, new, new_len);
+                result_pos += new_len;
+            }
+            cur = sub + old_len;
+        } else {
+            c = strlen(cur);
+            result_len += c;
+            if(result_len < SUB_STR_LEN) {
+                memcpy(result_pos, cur, c);
+                result_pos += c;
+            }
+            cur = NULL;
+        }
+    }
+    *result_pos = '\0';
+    return result;
+}
+
+/*
+ * Return string or "N/A" if string is NULL.
+ */
+char *
+string_or_na(char *string)
+{
+    if(string) {
+        return string;
+    } else {
+        return "N/A";
+    }
+}
+
+/*
+ * Convert IPv4 netmask (big endian) to CIDR length. 
+ * This function returns zero for invalid netmask. 
+ */
+uint8_t
+ipv4_mask_to_len(uint32_t mask)
+{
+    uint8_t l = 0;
+    uint32_t m = be32toh(mask);
+    while(m & 0x80000000) { /* check MSB */
+        l++; 
+        m <<= 1; /* Left shift the mask by one bit */
+    }
+    if(m) return 0;
+    return l;
+}
+
+/*
+ * Convert IPv4 CIDR length to netmask (big endian).
+ */
+uint32_t
+ipv4_len_to_mask(uint8_t len)
+{
+    if(len >= 32) return UINT32_MAX;
+    if(len == 0) return 0;
+    return htobe32(~((1 << (32 - len)) - 1));
+}
+
+/*
+ * Return true if address belongs to network.
+ */
+bool
+ipv4_addr_in_network(uint32_t address, ipv4_prefix *network)
+{
+    uint32_t mask = ipv4_len_to_mask(network->len);
+    if((address & mask) == (network->address & mask)) {
+        return true;
+    }
+    return false;
+}
+
+uint64_t
+timespec_to_nsec(struct timespec *timestamp)
+{
+    return (timestamp->tv_sec * 1000000000) + timestamp->tv_nsec;
+}
+
+/* 
+ * Compare two MAC addresses and return
+ * 1 if mac1 is larger, -1 if mac2 is larger,
+ * and 0 if both MAC addresses are equal. 
+ */
+int 
+compare_mac_addresses(uint8_t *mac1, uint8_t *mac2)
+{
+    for(int i = 0; i < ETH_ADDR_LEN; i++) {
+        if (mac1[i] > mac2[i])
+            return 1; /* mac1 is larger */
+        else if (mac1[i] < mac2[i])
+            return -1; /* mac2 is larger */
+    }
+    return 0; /* MAC addresses are equal */
+}

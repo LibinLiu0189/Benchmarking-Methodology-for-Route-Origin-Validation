@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RtBrick - Routing Protocol and BNG Blaster &mdash; BNG Blaster 0.9 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/tabs.css?v=a5c4661c" />
+      <link rel="stylesheet" type="text/css" href="_static/custom.css?v=411f5019" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=049aceee"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="_static/tabs.js?v=3030b3cb"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="install.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            BNG Blaster
+              <img src="_static/rtbrick_logo.png" class="logo" alt="Logo"/>
+          </a>
+              <div class="version">
+                0.9.X
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="access/index.html">Access Protocols</a></li>
+<li class="toctree-l1"><a class="reference internal" href="routing/index.html">Routing Protocols</a></li>
+<li class="toctree-l1"><a class="reference internal" href="streams.html">Traffic Streams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="icmp.html">ICMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="http.html">HTTP Emulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nat.html">NAT / CGNAT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reports.html">Reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration/index.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API/CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller.html">Controller</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">BNG Blaster</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">RtBrick - Routing Protocol and BNG Blaster</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="rtbrick-routing-protocol-and-bng-blaster">
+<h1>RtBrick - Routing Protocol and BNG Blaster<a class="headerlink" href="#rtbrick-routing-protocol-and-bng-blaster" title="Link to this heading"></a></h1>
+<p><strong>The open network tester for the IP networking community.</strong></p>
+<p>The <strong>Routing Protocol and BNG Blaster</strong> is an open-source
+network tester for <strong>routing</strong> and <strong>access</strong> protocols.</p>
+<p>Originally developed as an access protocol tester, the BNG Blaster has undergone a
+significant evolution, transforming into a comprehensive network testing tool that
+now encompasses both access and routing functionalities. Its scope has expanded beyond
+the assessment of access protocols and now encompasses a broader spectrum, involving
+the evaluation of network functionalities at large. Contrary to its nomenclature,
+the BNG Blaster isn’t restricted only to BNG (Broadband Network Gateway) testing.</p>
+<p>It simulates a massive number of PPPoE and IPoE (DHCP) subscribers, encompassing
+IPTV and L2TP (LNS). Additionally, it supports all common routing protocols such
+as IS-IS, OSPF, LDP and BGP. This allows for comprehensive testing of both BNG
+and non-BNG routers, enabling end-to-end evaluations.</p>
+<p>The included traffic generator serves various functions. It can be used to verify
+forwarding, conduct QoS tests, and measure convergence times. With the capacity to
+handle millions of separate tracked flows, it allows for thorough verification of
+every forwarding state within a complete internet routing table. Furthermore, it
+enables the transmission of traffic to each specific QoS queue present in
+service edge routers with detailed per-flow statistics like receive rate, loss
+or latency.</p>
+<p>The BNG Blaster is used by leading network operators like Deutsche Telekom AG
+with their famous Access 4.0 project, network hard- and software vendors like
+RtBrick and many more.</p>
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-0-0-0" aria-selected="true" class="sphinx-tabs-tab" id="tab-0-0-0" name="0-0" role="tab" tabindex="0">Modern Software</button><button aria-controls="panel-0-0-1" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-1" name="0-1" role="tab" tabindex="-1">Access Protocols</button><button aria-controls="panel-0-0-2" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-2" name="0-2" role="tab" tabindex="-1">Routing Protocols</button><button aria-controls="panel-0-0-3" aria-selected="false" class="sphinx-tabs-tab" id="tab-0-0-3" name="0-3" role="tab" tabindex="-1">Traffic Generator</button></div><div aria-labelledby="tab-0-0-0" class="sphinx-tabs-panel" id="panel-0-0-0" name="0-0" role="tabpanel" tabindex="0"><ul class="simple">
+<li><p>Emulate massive nodes and sessions with low CPU and memory footprint</p></li>
+<li><p>Runs on every modern Linux, virtual machine and containers</p></li>
+<li><p>All protocols implemented in user space and optimized for performance</p></li>
+<li><p>Automation-friendly API</p></li>
+<li><p>Optional DPDK support (experimental)</p></li>
+<li><p>…</p></li>
+</ul>
+</div><div aria-labelledby="tab-0-0-1" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-1" name="0-1" role="tabpanel" tabindex="0"><ul class="simple">
+<li><p>Emulate massive PPPoE and IPoE (DHCP) clients</p></li>
+<li><p>Emulate L2TPv2 LNS servers with different behaviors</p></li>
+<li><p>Emulate A10NSP interfaces for L2BSA testing</p></li>
+<li><p>Included multicast and IPTV test suite</p></li>
+<li><p>Verify legal interception (LI) traffic</p></li>
+<li><p>Support all access protocols with link aggregation (LAG)</p></li>
+<li><p>…</p></li>
+</ul>
+</div><div aria-labelledby="tab-0-0-2" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-2" name="0-2" role="tabpanel" tabindex="0"><ul class="simple">
+<li><p>Setup thousands of BGP sessions with millions of prefixes</p></li>
+<li><p>Verify MPLS labels for millions of flows</p></li>
+<li><p>Emulate ISIS and OSPFv2/3 topologies with thousands of nodes</p></li>
+<li><p>Support for ISIS and OSPFv2/3 Segment Routing</p></li>
+<li><p>Support for LDP and traffic streams with dynamically resolved labels</p></li>
+<li><p>Support all routing protocols with link aggregation (LAG)</p></li>
+<li><p>…</p></li>
+</ul>
+</div><div aria-labelledby="tab-0-0-3" class="sphinx-tabs-panel" hidden="true" id="panel-0-0-3" name="0-3" role="tabpanel" tabindex="0"><ul class="simple">
+<li><p>Generate and track millions of traffic flows</p></li>
+<li><p>Verify your QoS configuration</p></li>
+<li><p>Verify all forwarding states</p></li>
+<li><p>Measure convergence times and loss</p></li>
+<li><p>Capture traffic</p></li>
+<li><p>Emulate HTTP clients and servers</p></li>
+<li><p>NAT and CGNAT testing</p></li>
+<li><p>…</p></li>
+</ul>
+</div></div>
+<p>A short introduction from <a class="reference external" href="https://youtu.be/4rmwf6livyI">DENOG15</a>
+can be found on YouTube. There are even more videos and articles
+listed below.</p>
+<img alt="BNG Blaster Interactive" src="_images/bbl_interactive.png" />
+<p>The BNG Blaster has been completely built from scratch in <strong>C</strong>. This includes user-space implementations
+of the entire protocol stack. The core is based on a very simple event loop that serves timers and
+signals. The timers have been built using a lightweight constant time (<em>O(1)</em>) library. The
+<a class="reference external" href="https://github.com/rtbrick/bngblaster/blob/main/code/common/src/timer.h">timer library</a>
+was built to start, restart and delete the protocol session FSM timers quickly and at scale.</p>
+<img alt="BNG Blaster Architecture" src="_images/bbl_arch.png" />
+<p>This project will be actively maintained and further evolved by RtBrick. We are fully committed to building
+a project for the community and take issue and enhancement requests seriously. We are looking forward to any
+kind of contributions, new features, bug fixes, or tools. Even contributions to the documentation are more
+than welcome.</p>
+<p>If you are interested in the BNG Blaster, or simply looking to find out more about it, we recommend going through
+the examples in the quick start guide.</p>
+<p>Our mission is to build better networks with open test suites.</p>
+<section id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quickstart Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="interfaces.html">Interfaces</a></li>
+<li class="toctree-l1"><a class="reference internal" href="access/index.html">Access Protocols</a></li>
+<li class="toctree-l1"><a class="reference internal" href="routing/index.html">Routing Protocols</a></li>
+<li class="toctree-l1"><a class="reference internal" href="streams.html">Traffic Streams</a></li>
+<li class="toctree-l1"><a class="reference internal" href="icmp.html">ICMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="http.html">HTTP Emulation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="nat.html">NAT / CGNAT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reports.html">Reports</a></li>
+<li class="toctree-l1"><a class="reference internal" href="configuration/index.html">Configuration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api/index.html">API/CLI</a></li>
+<li class="toctree-l1"><a class="reference internal" href="controller.html">Controller</a></li>
+<li class="toctree-l1"><a class="reference internal" href="performance.html">Performance Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshooting.html">Troubleshooting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions</a></li>
+</ul>
+</div>
+</section>
+<section id="contact">
+<h2>Contact<a class="headerlink" href="#contact" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Mail: <a class="reference external" href="mailto:bngblaster&#37;&#52;&#48;rtbrick&#46;com">bngblaster<span>&#64;</span>rtbrick<span>&#46;</span>com</a></p></li>
+<li><p>Chat: <a class="reference external" href="https://matrix.to/#/#bngblaster:matrix.org">matrix.org #bngblaster</a></p></li>
+</ul>
+</section>
+<section id="articles">
+<h2>Articles<a class="headerlink" href="#articles" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://blog.apnic.net/2022/05/26/bng-blaster-the-open-network-tester-for-the-ip-networking-community/">APNIC Blog - The open network tester for the IP networking community</a></p></li>
+</ul>
+</section>
+<section id="youtube">
+<h2>YouTube<a class="headerlink" href="#youtube" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://www.youtube.com/live/WdATdbaveRI?si=lgw1W-HckormViK9&amp;t=13599">DKNOG14 (2024)</a></p></li>
+<li><p><a class="reference external" href="https://youtu.be/4rmwf6livyI">DENOG15 (2023)</a></p></li>
+<li><p><a class="reference external" href="https://youtu.be/HTswAl388Gg">UKNOF49 (2022)</a></p></li>
+<li><p><a class="reference external" href="https://youtu.be/LVg6rlVEfNU">DENOG13 (2021)</a></p></li>
+<li><p><a class="reference external" href="https://youtu.be/EHJ70p0_Sw0">Introduction (2021)</a></p></li>
+</ul>
+</section>
+<section id="trainings-and-examples">
+<h2>Trainings and Examples:<a class="headerlink" href="#trainings-and-examples" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/rtbrick/bngblaster-training">https://github.com/rtbrick/bngblaster-training</a></p></li>
+<li><p><a class="reference external" href="https://github.com/rtbrick/BGP-CP-DP-Testing">https://github.com/rtbrick/BGP-CP-DP-Testing</a></p></li>
+</ul>
+</section>
+<section id="sources">
+<h2>Sources<a class="headerlink" href="#sources" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/rtbrick/bngblaster">https://github.com/rtbrick/bngblaster</a></p></li>
+<li><p><a class="reference external" href="https://github.com/rtbrick/bngblaster-controller">https://github.com/rtbrick/bngblaster-controller</a></p></li>
+</ul>
+</section>
+<section id="license">
+<h2>License<a class="headerlink" href="#license" title="Link to this heading"></a></h2>
+<p>BNG Blaster is licensed under the BSD 3-Clause License, which means that you are free to get and use it for
+commercial and non-commercial purposes as long as you fulfill its conditions.</p>
+<p>See the <a class="reference external" href="https://github.com/rtbrick/bngblaster/blob/main/LICENSE">LICENSE</a>
+file for more details.</p>
+</section>
+<section id="copyright">
+<h2>Copyright<a class="headerlink" href="#copyright" title="Link to this heading"></a></h2>
+<p>Copyright © 2020-2026, RtBrick, Inc.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="install.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020-2026, RtBrick, Inc..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

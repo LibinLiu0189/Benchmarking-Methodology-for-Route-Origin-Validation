@@ -1,0 +1,24 @@
+--- a/bgprpki-io/rpki-rtr-protocol/rpkirtr_svr.c
++++ b/bgprpki-io/rpki-rtr-protocol/rpkirtr_svr.c
+@@ -532,16 +532,19 @@
+   uint32_t               length = sizeof(RPKIEndOfDataHeader);
+   bool                   retVal = false;
+ 
+-  memset(hdr, 0, sizeof(sizeof(RPKIEndOfDataHeader_2)));
++  memset(hdr, 0, sizeof(RPKIEndOfDataHeader_2));
+ 
+   switch (version)
+   {
+     case 2:
++    case 1:
+       hdr->refresh_interval = htonl(refresh_interval);
+       hdr->retry_interval   = htonl(retry_interval);
+       hdr->expire_interval  = htonl(expire_interval);
+       length                = sizeof(RPKIEndOfDataHeader_2);
+-    case 1:
++      /* RFC 8210 v1 and v2 carry timers; only v0 uses 12 bytes. */
++      /* fall through */
++    case 0:
+       hdr->v1.version       = version;
+       hdr->v1.type          = (uint8_t)PDU_TYPE_END_OF_DATA;
+       hdr->v1.sessionID     = htons(sessionID);

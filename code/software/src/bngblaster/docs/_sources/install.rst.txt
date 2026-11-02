@@ -1,0 +1,243 @@
+.. _install:
+
+Installation
+============
+
+The BNG Blaster should run on any modern Linux distribution
+but is primarily tested on Debian Bookworm and Ubuntu 22.04 LTS.
+
+Install Ubuntu
+--------------
+
+Install dependencies:
+
+.. code-block:: none
+
+    # Ubuntu 18.04 and 20.04
+    sudo apt install -y libssl1.1 libncurses5 libjansson4
+    # Debian Bookworm, Ubuntu 22.04 and newer
+    sudo apt install -y libssl3 libncurses6 libjansson4
+
+
+Download and install the Debian package: https://github.com/rtbrick/bngblaster/releases
+
+.. code-block:: none
+
+    sudo dpkg -i <package>
+
+This command installs the BNG Blaster to `/usr/sbin/bngblaster`.
+
+Build from Sources
+------------------
+
+Dependencies
+^^^^^^^^^^^^
+
+The BNG Blaster has dependencies on the RtBrick
+`libdict fork <https://github.com/rtbrick/libdict>`_
+and the following standard dependencies:
+
+.. code-block:: none
+
+    sudo apt install -y unzip
+
+    # install libdict for Ubuntu 18.04 LTS
+    wget https://github.com/rtbrick/libdict/releases/download/v1.0.1/libdict-debian.zip
+    unzip libdict-debian.zip
+
+    # install libdict for Ubuntu 22.04 LTS
+    wget https://github.com/rtbrick/libdict/releases/download/1.0.6/libdict-ubuntu-22.04.zip
+    unzip libdict-ubuntu-22.04.zip
+
+    # install libdict for Debian Bookworm
+    wget https://github.com/rtbrick/libdict/releases/download/1.0.6/libdict-bookworm.zip
+    unzip libdict-bookworm.zip
+
+    sudo dpkg -i libdict_1.0.6_amd64.deb
+    sudo dpkg -i libdict-dev_1.0.6_amd64.deb
+
+    # install other dependencies
+    sudo apt install -y cmake \
+        libpcap-dev \
+        libcunit1-dev \
+        libncurses5-dev \
+        libssl-dev \
+        libjansson-dev \
+        libnuma-dev
+
+Build
+^^^^^
+
+Per default cmake (`cmake .`) will build the BNG Blaster as a release
+version with optimization and debug symbols (RelWithDebInfo).
+
+.. code-block:: none
+
+    git clone https://github.com/rtbrick/bngblaster.git
+    cd bngblaster
+    mkdir build
+    cd build
+    cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo ..
+    make all
+
+Alternative it is also possible to build a debug version without 
+optimization for detailed troubleshooting using gdb.
+
+.. code-block:: none
+
+    mkdir build
+    cd build
+    cmake -DCMAKE_BUILD_TYPE=Debug ..
+    make all
+
+
+There are also CPack files generated which allow to easily generate a Debian
+package by just executing `cpack` from the build directory.
+
+It is also recommended to provide the GIT commit details to be included in the
+manually build the version as shown below:
+
+.. code-block:: none
+
+    cmake -DGIT_REF=`git rev-parse --abbrev-ref HEAD` -DGIT_SHA=`git rev-parse HEAD` .
+
+*Example:*
+
+.. code-block:: none
+
+    $ bngblaster -v
+    GIT:
+    REF: dev
+    SHA: df453a5ee9dbf6440aefbfb9630fa0f06e326d44
+    IO Modes: packet_mmap_raw (default), packet_mmap, raw
+
+Install
+^^^^^^^
+
+Then BNG Blaster can be installed using the make install target.
+
+.. code-block:: none
+
+    sudo make install
+
+This command installs the BNG Blaster to `/usr/sbin/bngblaster`.
+
+Build and Run Unit Tests
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Building and running unit tests requires CMocka to be installed:
+
+.. code-block:: none
+
+    sudo apt install libcmocka-dev
+
+The option `BNGBLASTER_TESTS` enables to build unit tests.
+
+.. code-block:: none
+
+    cmake -DCMAKE_BUILD_TYPE=Debug -DBNGBLASTER_TESTS=ON .
+    make all
+    make test
+
+*Example:*
+
+.. code-block:: none
+
+    $ make test
+    Running tests...
+    Test project
+        Start 1: TestProtocols
+    1/1 Test #1: TestProtocols ....................   Passed    0.00 sec
+
+    100% tests passed, 0 tests failed out of 1
+
+    Total Test time (real) =   0.00 sec
+
+.. _install-dpdk:
+
+Build with DPDK Support
+^^^^^^^^^^^^^^^^^^^^^^^
+
+The following steps are required to build the BNG Blaster with experimental
+:ref:`DPDK <dpdk-usage>` support. 
+
+.. note::
+
+    Tested with DPDK version 25.11.0 and Ubuntu 22.04 (LTS)!
+
+
+Download and install DPDK:
+https://doc.dpdk.org/guides/linux_gsg/build_dpdk.html
+
+.. code-block:: none
+
+    # install meson 
+    sudo apt install meson ninja-build 
+
+    # download DPDK
+    wget https://fast.dpdk.org/rel/dpdk-25.11.tar.xz
+    tar xJf dpdk-25.11.tar.xz
+    cd dpdk-25.11
+
+    # build with driver SDK
+    meson -Denable_driver_sdk=true build
+    cd build
+    ninja
+
+    # install 
+    sudo ninja install
+    sudo ldconfig
+
+Building BNG Blaster with DPDK support works as explained before but with 
+the additional cmake argument ``-DBNGBLASTER_DPDK=on``
+
+.. code-block:: none
+
+    cmake -DBNGBLASTER_DPDK=on ..
+
+If DPDK is installed correctly, cmake should show the following output: 
+
+.. code-block:: none
+
+    -- Build bngblaster with DPDK support
+    -- Found PkgConfig: /usr/bin/pkg-config (found version "1.8.0")
+    -- Checking for module 'libdpdk'
+    --   Found libdpdk, version 25.11.0
+    -- Found DPDK via pkg-config
+
+The installed version should now show `dpdk` as new IO mode. 
+
+.. code-block:: none
+
+    sudo bngblaster -v
+    Version: DEV
+    Compiler: GNU (11.2.0)
+    IO Modes: packet_mmap_raw (default), packet_mmap, raw, dpdk
+
+
+Running BNG Blaster
+-------------------
+
+The BNG Blaster needs permission to send raw packets and change network interface
+settings. The easiest way to run the BNG Blaster is either as the root user or 
+with `sudo`:
+
+.. code-block:: none
+
+    # As root
+    bngblaster -C config.json -I
+
+    # As a normal user:
+    sudo bngblaster -C config.json -I
+
+
+A third option is to set capabilities on the binary with for example `setcap`
+as shown below:
+
+.. code-block:: none
+
+    sudo setcap cap_net_raw,cap_net_admin,cap_dac_read_search+eip `which bngblaster`
+
+    # As normal user:
+    bngblaster -C config.json -I
+

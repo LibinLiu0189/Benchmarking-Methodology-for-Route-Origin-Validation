@@ -1,0 +1,146 @@
+#! /bin/sh
+
+#
+# Script to give the appropriate compiler flags and linker flags
+# to use when building code that uses libpcap.
+#
+# These variables come from the configure script, so includedir and
+# libdir may be defined in terms of prefix and exec_prefix, so the
+# latter must be defined as well.
+#
+prefix="/usr"
+exec_prefix="${prefix}"
+includedir="${prefix}/include"
+LIBS="-libverbs  -ldbus-1 "
+LIBS_STATIC="-libverbs -lbnxt_re-rdmav59 -lcxgb4-rdmav59 -lefa -lerdma-rdmav59 -lhns -lionic -lirdma-rdmav59 -lmana -lmlx4 -lmlx5 -lmthca-rdmav59 -locrdma-rdmav59 -lqedr-rdmav59 -lvmw_pvrdma-rdmav59 -lhfi1verbs-rdmav59 -lipathverbs-rdmav59 -lrxe-rdmav59 -lsiw-rdmav59 -libverbs -lnl-route-3 -lnl-3 -lpthread  -ldbus-1 -pthread -lsystemd "
+VERSION="1.10.6"
+
+usage()
+{
+	echo "Usage: pcap-config [ --help ] [ --version ] [ --cflags ]"
+	echo "                   [ --libs | --additional-libs ]"
+	echo "                   [ --static | --static-pcap-only ]"
+}
+
+static=0
+static_pcap_only=0
+show_cflags=0
+show_libs=0
+show_additional_libs=0
+while [ "$#" != 0 ]
+do
+	case "$1" in
+
+	--static)
+		static=1
+		;;
+
+	--static-pcap-only)
+		static_pcap_only=1
+		;;
+
+	--cflags)
+		show_cflags=1
+		;;
+
+	--libs)
+		show_libs=1
+		;;
+
+	--additional-libs)
+		show_additional_libs=1
+		;;
+
+	-h|--help)
+		usage
+		exit 0
+		;;
+
+	--version)
+		echo "$VERSION"
+		exit 0
+		;;
+
+	*)
+		echo "pcap-config: Invalid command-line option $1 specified" 1>&2
+		usage 1>&2
+		exit 1
+		;;
+	esac
+	shift
+done
+
+if [ "$static" = 1 ]
+then
+	#
+	# Include LIBS_STATIC so that the flags include libraries
+	# containing routines that libpcap uses, and libraries
+	# containing routines those libraries use, etc., so that a
+	# completely statically linked program - i.e., linked only with
+	# static libraries - will be linked with all necessary
+	# libraries.
+	#
+	if [ "$show_cflags" = 1 -a "$show_libs" = 1 ]
+	then
+		echo "-I$includedir -lpcap $LIBS_STATIC"
+	elif [ "$show_cflags" = 1 -a "$show_additional_libs" = 1 ]
+	then
+		echo "-I$includedir $LIBS_STATIC"
+	elif [ "$show_cflags" = 1 ]
+	then
+		echo "-I$includedir"
+	elif [ "$show_libs" = 1 ]
+	then
+		echo "-lpcap $LIBS_STATIC"
+	elif [ "$show_additional_libs" = 1 ]
+	then
+		echo "$LIBS_STATIC"
+	fi
+elif [ "$static_pcap_only" = 1 ]
+then
+	#
+	# Include LIBS so that the flags include libraries
+	# containing routines that libpcap uses, but not the libraries
+	# on which libpcap depends, so that an otherwise
+	# dynamically-linked program, linked statically only with
+	# libpcap - i.e., linked with a static libpcap and dynamic
+	# versions of other libraries - will be linked with all
+	# necessary libraries.
+	#
+	if [ "$show_cflags" = 1 -a "$show_libs" = 1 ]
+	then
+		echo "-I$includedir -lpcap $LIBS"
+	elif [ "$show_cflags" = 1 -a "$show_additional_libs" = 1 ]
+	then
+		echo "-I$includedir $LIBS"
+	elif [ "$show_cflags" = 1 ]
+	then
+		echo "-I$includedir"
+	elif [ "$show_libs" = 1 ]
+	then
+		echo "-lpcap $LIBS"
+	elif [ "$show_additional_libs" = 1 ]
+	then
+		echo "$LIBS"
+	fi
+else
+	#
+	# Don't included LIBS or LIBS_STATIC, for building a program
+	# with a dynamic libpcap; libpcap, being a dynamic library, will
+	# cause all of its dynamic-library dependencies to be pulled in
+	# at run time.
+	#
+	if [ "$show_cflags" = 1 -a "$show_libs" = 1 ]
+	then
+		echo "-I$includedir -lpcap"
+	elif [ "$show_cflags" = 1 -a "$show_additional_libs" = 1 ]
+	then
+		echo "-I$includedir"
+	elif [ "$show_cflags" = 1 ]
+	then
+		echo "-I$includedir"
+	elif [ "$show_libs" = 1 ]
+	then
+		echo "-lpcap"
+	fi
+fi

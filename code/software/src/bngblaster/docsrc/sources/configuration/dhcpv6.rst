@@ -1,0 +1,42 @@
+.. code-block:: json
+
+    { "dhcpv6": {} }
+
++-----------------------------------+----------------------------------------------------------------------+
+| Attribute                         | Description                                                          |
++===================================+======================================================================+
+| **enable**                        | | This option allows enabling or disabling DHCPv6.                   |
+|                                   | | Default: true                                                      |
++-----------------------------------+----------------------------------------------------------------------+
+| **ia-na**                         | | This option allows enabling or disabling DHCPv6 IA_NA.             |
+|                                   | | Default: true                                                      |
++-----------------------------------+----------------------------------------------------------------------+
+| **ia-pd**                         | | This option allows enabling or disabling DHCPv6 IA_PD.             |
+|                                   | | Default: true                                                      |
++-----------------------------------+----------------------------------------------------------------------+
+| **ia-separate**                   | | Send seperate requests for IA_NA and IA_PD.                        |
+|                                   | | Default: false                                                     |
++-----------------------------------+----------------------------------------------------------------------+
+| **rapid-commit**                  | | DHCPv6 rapid commit (2-way handshake).                             |
+|                                   | | Default: true                                                      |
++-----------------------------------+----------------------------------------------------------------------+
+| **timeout**                       | | DHCPv6 timeout in seconds.                                         |
+|                                   | | Default: 5                                                         |
++-----------------------------------+----------------------------------------------------------------------+
+| **retry**                         | | DHCPv6 retry.                                                      |
+|                                   | | Default: 10                                                        |
++-----------------------------------+----------------------------------------------------------------------+
+| **vlan-priority**                 | | VLAN PBIT for all DHCPv6 control traffic.                          |
+|                                   | | Overrides IPoE vlan-priority for DHCPv6 packets only.              |
+|                                   | | Default: 0                                                         |
++-----------------------------------+----------------------------------------------------------------------+
+| **access-line**                   | | Add access-line attributes like Agent-Remote/Circuit-Id.           |
+|                                   | | Default: true                                                      |
++-----------------------------------+----------------------------------------------------------------------+
+| **ldra**                          | | This option allows enabling or disabling LDRA.                     |
+|                                   | | DHCPv6 LDRA (Lightweight DHCPv6 Relay Agent) is defined in         |
+|                                   | | [RFC6221](https://datatracker.ietf.org/doc/html/rfc6221).          |
+|                                   | | Adding access-line information like Agent-Remote-Id or             |
+|                                   | | Agent-Circuit-Id should be used with LDRA enabled only.            |
+|                                   | | Default: false                                                     |
++-----------------------------------+----------------------------------------------------------------------+

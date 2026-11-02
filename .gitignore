@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+/code/new-results/
+/code/results/
+/code/runtime/config/*
+/code/software/bin/
+/code/software/bin-brio-first-vrp/
+/code/software/bin-brio-disconnect/
+/code/software/build/
