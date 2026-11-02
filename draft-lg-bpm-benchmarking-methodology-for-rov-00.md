@@ -1,12 +1,12 @@
 ---
 stand_alone: true
 ipr: trust200902
-cat: info # Check
+cat: info
 submissiontype: IETF
 area: Operations and Management
-wg: BMWG
+wg: BPM
 
-docname: draft-lg-bmwg-benchmarking-methodology-for-rov-04
+docname: draft-lg-bpm-benchmarking-methodology-for-rov-00
 
 title: Benchmarking Methodology for Route Origin Validation (ROV)
 abbrev: ROV Benchmarking
@@ -53,28 +53,28 @@ informative:
     author:
       org: "CZ.NIC"
     target: https://bird.nic.cz/
-    date: false
+    date: Accessed 2026
 
   BRIO:
     title: "NIST BGP-RPKI-IO (BRIO)"
     author:
       org: "National Institute of Standards and Technology"
     target: https://github.com/usnistgov/NIST-BRIO
-    date: false
+    date: Accessed 2026
 
   BNGBLASTER:
     title: "Routing Protocol and BNG Blaster"
     author:
       org: "RtBrick"
     target: https://rtbrick.github.io/bngblaster/
-    date: false
+    date: Accessed 2026
 
   RIPE-RIS:
     title: "Routing Information Service (RIS)"
     author:
       org: "RIPE NCC"
     target: https://www.ripe.net/analyse/internet-measurements/routing-information-service-ris/
-    date: false
+    date: Accessed 2026
 
   RPKIViews:
     title: "RPKIViews"
@@ -82,19 +82,19 @@ informative:
       ins: J. Snijders
       name: Job Snijders
     target: https://rpkiviews.org/
-    date: false
+    date: Accessed 2026
 
   ROUTINATOR:
     title: "Routinator"
     author:
       org: "NLnet Labs"
     target: https://github.com/NLnetLabs/routinator
-    date: false
+    date: Accessed 2026
 
   STAYRTR:
     title: "StayRTR"
     target: https://github.com/bgp/stayrtr
-    date: false
+    date: Accessed 2026
 
 ...
 
@@ -694,21 +694,29 @@ This document has no actions for IANA.
 
 Many thanks to Giuseppe Fioccola, Christian Giese, and Maria Matejka for their review, comments, and suggestions.
 
+
 # Appendix A. Summary of Changes {#changes}
 {: numbered="false"}
 
-This appendix summarizes the major changes introduced in previous revisions of this document.
+This appendix summarizes the major changes introduced during the evolution of this document.
 
-## Appendix A.1. Changes from -00 to -01
+Versions -00 through -03 were published under the name draft-lg-bmwg-benchmarking-methodology-for-rov. Following the consolidation of the BMWG and IPPM working groups into the Benchmarking and Performance Measurement (BPM) Working Group, the document was renamed to draft-lg-bpm-benchmarking-methodology-for-rov. Accordingly, draft-lg-bpm-benchmarking-methodology-for-rov-00 continues the work of draft-lg-bmwg-benchmarking-methodology-for-rov-03.
+
+## Appendix A.1. Changes from draft-lg-bmwg-benchmarking-methodology-for-rov-03 to draft-lg-bpm-benchmarking-methodology-for-rov-00
 {: numbered="false"}
-The major changes from version -00 to version -01 are as follows:
 
-* Refined the test topology and baseline BGP input conditions to distinguish IPv4 and IPv6 route counts and to support mixed or AFI-specific benchmarking under fixed and repeatable conditions.  
-* Refined the data-plane traffic profile for convergence measurements by specifying a fixed frame size, PPS-based constant-rate traffic, separate treatment of burst traffic, and deterministic source and destination address selection rules.  
-* Clarified resource utilization metrics and measurement procedures by distinguishing system-level CPU and memory consumption from per-process utilization of the ROV process and the BGP or routing process, when such counters are available.  
-* Updated the scalability, churn, resource utilization, and reporting procedures to consistently document AFIs under test, data-plane traffic parameters, and system-level and process-level resource measurements.
+The major changes introduced in draft-lg-bpm-benchmarking-methodology-for-rov-00, compared with draft-lg-bmwg-benchmarking-methodology-for-rov-03, are as follows:
 
-## Appendix A.2. Changes from -01 to -02
+* Added Appendix B documenting a BIRD-based implementation of the benchmarking methodology and its experimental results.
+* Added an Implementation Status section describing the prototype and its experimental coverage.
+
+## Appendix A.2. Changes from -02 to -03
+{: numbered="false"}
+
+Version -03 adds this appendix to summarize the major changes introduced across document revisions and improve revision traceability. 
+No technical changes to the benchmarking methodology or benchmark procedures are introduced in this revision.
+
+## Appendix A.3. Changes from -01 to -02
 {: numbered="false"}
 
 The major changes from version -01 to version -02 are as follows:
@@ -718,21 +726,16 @@ The major changes from version -01 to version -02 are as follows:
 * Refined the ROV validation latency test by introducing the structural distribution of affected prefixes as a controlled variable. The methodology now distinguishes localized and distributed prefix sets and requires the locality rule, AFI mix, prefix-length distribution, and cause of each validation-state change to be documented.  
 * Reworked the BGP convergence benchmark into two cases: VRP-triggered BGP convergence and BGP-triggered convergence with and without ROV. The revision also introduced separate end-to-end and post-VRP-installation convergence timers and more explicit controls for comparing ROV-enabled and ROV-disabled runs.  
 * Extended RTR session recovery, cache failover, and full resynchronization tests to include the subsequent BGP recalculation and convergence caused by restored or changed ROV state.  
-* Expanded the reporting requirements to cover the newly introduced VRP dataset characteristics, update types, validation-change causes, locality conditions, and convergence timer definitions, and refined the use of normative requirement language throughout the methodology.  
+* Expanded the reporting requirements to cover the newly introduced VRP dataset characteristics, update types, validation-change causes, locality conditions, and convergence timer definitions, and refined the use of normative requirement language throughout the methodology.
 
-## Appendix A.3. Changes from -02 to -03
+## Appendix A.4. Changes from -00 to -01
 {: numbered="false"}
+The major changes from version -00 to version -01 are as follows:
 
-Version -03 adds this appendix to summarize the major changes introduced across document revisions and improve revision traceability. 
-No technical changes to the benchmarking methodology or benchmark procedures are introduced in this revision.
-
-## Appendix A.4. Changes from -03 to -04
-{: numbered="false"}
-
-The major changes from version -03 to version -04 are as follows:
-
-* Added Appendix B documenting a BIRD-based implementation of the benchmarking methodology and its experimental results.
-* Added an Implementation Status section describing the prototype and its experimental coverage.
+* Refined the test topology and baseline BGP input conditions to distinguish IPv4 and IPv6 route counts and to support mixed or AFI-specific benchmarking under fixed and repeatable conditions.  
+* Refined the data-plane traffic profile for convergence measurements by specifying a fixed frame size, PPS-based constant-rate traffic, separate treatment of burst traffic, and deterministic source and destination address selection rules.  
+* Clarified resource utilization metrics and measurement procedures by distinguishing system-level CPU and memory consumption from per-process utilization of the ROV process and the BGP or routing process, when such counters are available.  
+* Updated the scalability, churn, resource utilization, and reporting procedures to consistently document AFIs under test, data-plane traffic parameters, and system-level and process-level resource measurements.  
 
 # Appendix B. Implementation Details {#implementation-detail}
 {: numbered="false"}
@@ -742,7 +745,7 @@ This appendix describes the application of the benchmark tests in {{benchmark-te
 ## Appendix B.1. Test Environment {#report-environment}
 {: numbered="false"}
 
-The Device Under Test (DUT) consists of BIRD for routing and ROV processing, together with the Linux kernel for packet forwarding. BRIO supplies Validated ROA Payloads (VRPs) over the RPKI-to-Router (RTR) protocol, with local modifications providing first-Prefix-PDU send timestamps and controlled client disconnection. Bngblaster establishes BGP sessions and advertises the baseline and update routes, with a local modification for IPv6 neighbor emulation. A separate ingress sends UDP probes through the DUT; receivers at the emulated BGP peers identify the forwarding next hop. The test environment configuration is summarized in {{fig-test-environment}}.
+The DUT consists of BIRD for routing and ROV processing, together with the Linux kernel for packet forwarding. BRIO supplies VRPs over the RTR protocol, with local modifications providing first-Prefix-PDU send timestamps and controlled client disconnection. Bngblaster establishes BGP sessions and advertises the baseline and update routes, with a local modification for IPv6 neighbor emulation. A separate ingress sends UDP probes through the DUT; receivers at the emulated BGP peers identify the forwarding next hop. The test environment configuration is summarized in {{fig-test-environment}}.
 
 The test setup uses BRIO for direct control over incremental VRP additions and withdrawals in the VRP churn and stress test ({{vrp-churn-and-stress-tests}}). By comparison, widely used RTR tools, such as Routinator {{ROUTINATOR}} and StayRTR {{STAYRTR}}, derive incremental updates by comparing complete VRP sets internally. The additional processing delays transmission, making this approach unsuitable for continuous monitoring in this test.
 
